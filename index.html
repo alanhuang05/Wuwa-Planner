@@ -50,7 +50,7 @@ button{ cursor:pointer; }
 header.top{ display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px 24px; padding-bottom:6px; }
 h1{ font-family:var(--font-display); font-weight:700; font-size:clamp(1.9rem,4vw,2.7rem); line-height:1.05; margin:0; letter-spacing:-0.015em; }
 .lede{ margin:6px 0 0; color:var(--muted); max-width:60ch; }
-nav.tabs{ display:flex; gap:4px; border-bottom:2px solid var(--line); margin:18px 0 22px; overflow-x:auto; }
+nav.tabs{ display:flex; gap:4px; border-bottom:2px solid var(--line); margin:18px 0 22px; overflow-x:auto; overflow-y:hidden; }
 nav.tabs a{ padding:10px 16px; text-decoration:none; color:var(--muted); font-weight:600; border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap; }
 nav.tabs a[aria-current="page"]{ color:var(--ink); border-bottom-color:var(--accent); }
 nav.tabs a:hover{ color:var(--ink); }
@@ -128,9 +128,21 @@ select.mini:hover,select.mini:focus{ border-color:var(--line); background:var(--
 .chip.st-pull{ background:var(--pull-bg); border-color:var(--pull); }
 .chip.st-build{ background:var(--build-bg); border-color:var(--build); }
 .chip.st-done{ background:var(--done-bg); border-color:var(--done); }
-.chip-name{ padding:4px 4px 4px 9px; text-align:left; overflow-wrap:anywhere; flex:1; user-select:none; }
+.chip-name{ padding:3px 4px 3px 4px; text-align:left; flex:1; min-width:0; user-select:none; display:inline-flex; align-items:center; gap:5px; }
+.chip-name > span:not(.sr){ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.chip.main .chip-name{ padding:4px 2px 4px 4px; }
+
+/* icons */
+.av{ width:20px; height:20px; border-radius:50%; object-fit:cover; flex:none; background:var(--surface-2); display:inline-block; }
+.av.ph{ display:inline-flex; align-items:center; justify-content:center; font-size:0.66rem; font-weight:700; color:var(--muted); border:1px solid var(--line); }
+.chip.main .av{ width:26px; height:26px; }
+.pitem .av{ width:30px; height:30px; }
+.bitem .av{ width:30px; height:30px; }
+#combo-list .av{ width:24px; height:24px; align-self:center; }
+.wi{ width:28px; height:28px; object-fit:contain; flex:none; }
+.field .wi{ width:32px; height:32px; }
 .chip:not(.main) .chip-name:hover{ text-decoration:underline; }
-.chip-x{ background:none; border:0; color:var(--muted); padding:2px 7px 2px 3px; font-size:1rem; line-height:1; }
+.chip-x{ background:none; border:0; color:var(--muted); padding:2px 6px 2px 2px; font-size:1rem; line-height:1; flex:none; }
 .chip-x:hover{ color:var(--pull); }
 .slot-add{ margin-top:auto; }
 .slot-add input{ width:100%; font-size:0.86rem; padding:5px 8px; }
@@ -143,13 +155,15 @@ select.mini:hover,select.mini:focus{ border-color:var(--line); background:var(--
 /* add bars */
 .addbar{ display:flex; flex-wrap:wrap; gap:8px 10px; margin-bottom:22px; align-items:center; }
 .field{ display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.9rem; }
+.field[hidden]{ display:none; }
 .field.grow{ flex:1 1 220px; }
 .field.grow input{ flex:1; }
 .field input,.field select{ font-weight:400; }
 
 /* pull */
 .pull-cols{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; align-items:start; }
-.pcol{ background:var(--surface-2); border-radius:12px; padding:12px; border-top:5px solid var(--pull); }
+.pcol{ background:var(--surface-2); border-radius:12px; padding:12px; border-top:5px solid var(--line); }
+.pcol.t1{ border-top-color:var(--gold); } .pcol.t2{ border-top-color:var(--silver); } .pcol.t3{ border-top-color:var(--bronze); }
 .pcol-head{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
 .pcol-head h2{ font-size:1.1rem; }
 .count{ margin-left:auto; font-weight:600; color:var(--muted); }
@@ -158,7 +172,13 @@ select.mini:hover,select.mini:focus{ border-color:var(--line); background:var(--
 .plist:empty::before{ content:"Drag characters here"; color:var(--muted); font-size:0.88rem; padding:16px 12px; }
 .pitem{ padding:8px 10px; display:flex; flex-direction:column; gap:6px; cursor:grab; }
 .prow{ display:flex; align-items:center; gap:6px; }
-.pname{ font-weight:600; }
+.pname{ font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pitem .btn.small{ white-space:nowrap; flex:none; }
+.prow .grow{ flex:1; }
+.prow .mini{ flex:none; }
+.prow2{ display:flex; align-items:flex-start; gap:8px; padding-left:16px; }
+.prow2 .note.has,.prow2 .note:focus{ flex:1; width:auto; }
+.prow2 .uses{ margin:4px 0 0 auto; flex:none; }
 .uses{ font-size:0.78rem; color:var(--muted); margin-right:auto; white-space:nowrap; }
 
 /* build */
@@ -191,7 +211,7 @@ dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
 #combo-list{ position:absolute; z-index:60; margin:0; padding:4px; list-style:none; background:var(--surface); border:1px solid var(--line); border-radius:10px;
   box-shadow:0 10px 30px rgba(0,0,0,.18); max-height:280px; overflow-y:auto; display:none; }
 #combo-list.show{ display:block; }
-#combo-list li{ padding:6px 10px; border-radius:6px; cursor:pointer; display:flex; gap:8px; align-items:baseline; }
+#combo-list li{ padding:5px 8px; border-radius:6px; cursor:pointer; display:flex; gap:8px; align-items:center; }
 #combo-list li[aria-selected="true"]{ background:var(--surface-2); outline:1px solid var(--line); }
 #combo-list li mark{ background:none; color:inherit; font-weight:700; }
 #combo-list .tag{ margin-left:auto; font-size:0.75rem; font-weight:600; }
@@ -353,6 +373,18 @@ var CHAR_WEAPON = {
   function uid(){ return 'x' + Math.random().toString(36).slice(2,10); }
   function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function lc(s){ return String(s || '').trim().toLowerCase(); }
+  // File name for an icon: "Lux & Umbra" -> "lux-and-umbra", "Rover (Aero)" -> "rover-aero"
+  function slug(n){ return lc(n).replace(/&/g,'and').replace(/'/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  var WEAPON_SET = {};
+  Object.keys(WEAPONS).forEach(function(t){ [5,4,3].forEach(function(r){ WEAPONS[t][r].forEach(function(w){ WEAPON_SET[w] = 1; }); }); });
+  function charIcon(name){
+    var n = DB_LC[lc(name)];
+    if(!n) return name ? '<span class="av ph" aria-hidden="true">'+esc(String(name).trim().charAt(0).toUpperCase())+'</span>' : '';
+    return '<img class="av" src="icons/characters/'+slug(n)+'.webp" alt="" loading="lazy" draggable="false" onerror="this.style.opacity=0">';
+  }
+  function weaponIcon(w){
+    return WEAPON_SET[w] ? '<img class="wi" src="icons/weapons/'+slug(w)+'.webp" alt="" loading="lazy" draggable="false" onerror="this.style.opacity=0">' : '';
+  }
 
   var DB_LC = {};
   CHARACTERS.forEach(function(n){ DB_LC[n.toLowerCase()] = n; });
@@ -489,6 +521,7 @@ var CHAR_WEAPON = {
     if(!field.hidden){
       var sel = document.getElementById('nb-weapon');
       sel.innerHTML = weaponOptions(document.getElementById('nb-name').value, sel.value);
+      document.getElementById('nb-weapon-icon').innerHTML = weaponIcon(sel.value);
     }
   }
   function teamCount(name){ var n = lc(name); return state.teams.filter(function(t){ return t.slots.some(function(s){ return s.some(function(x){ return lc(x) === n; }); }); }).length; }
@@ -521,8 +554,8 @@ var CHAR_WEAPON = {
     var slotsHTML = t.slots.map(function(slot,si){
       var chips = infos[si].opts.map(function(c,i){
         return '<li class="chip st-'+c.status+(i===0?' main':'')+'" data-name="'+esc(c.name)+'">'
-          + '<span class="chip-name" role="button" tabindex="0" data-act="promote" data-team="'+t.id+'" data-slot="'+si+'" data-name="'+esc(c.name)+'"'+(i ? ' title="Click to make main pick, or drag to reorder"' : ' title="Drag to reorder"')+'>'
-          + esc(c.name)+'<span class="sr"> ('+STATUS[c.status].label+')</span></span>'
+          + '<span class="chip-name" role="button" tabindex="0" data-act="promote" data-team="'+t.id+'" data-slot="'+si+'" data-name="'+esc(c.name)+'"'+' title="'+esc(c.name)+(i ? ': click to make main pick, or drag to reorder' : ': drag to reorder')+'"'+'>'
+          + charIcon(c.name) + '<span>'+esc(c.name)+'</span><span class="sr"> ('+STATUS[c.status].label+')</span></span>'
           + '<button class="chip-x" data-act="rm-slot" data-team="'+t.id+'" data-slot="'+si+'" data-name="'+esc(c.name)+'" aria-label="Remove '+esc(c.name)+' from this slot">×</button></li>';
       }).join('');
       return '<div class="slot s-'+infos[si].status+'">'
@@ -559,9 +592,10 @@ var CHAR_WEAPON = {
     return '<li class="card bitem '+(b.done ? 'done' : 'open')+'" data-id="'+b.id+'">'
       + (b.done ? '' : '<span class="grip" aria-hidden="true">⠇</span>')
       + '<input type="checkbox" data-kind="build" data-id="'+b.id+'" data-field="done"'+(b.done?' checked':'')+' aria-label="Mark '+esc(label)+' as done">'
+      + charIcon(b.name)
       + '<span class="bname'+(b.name ? '' : ' general')+'">'+esc(b.name || 'General')+'</span>'
       + '<select class="mini" data-kind="build" data-id="'+b.id+'" data-field="task" aria-label="Task for '+esc(b.name || 'general task')+'">'+taskOptions(b.task)+'</select>'
-      + (b.task === 'weapon' ? '<select class="mini wsel" data-kind="build" data-id="'+b.id+'" data-field="weapon" aria-label="Weapon for '+esc(b.name || 'general task')+'">'+weaponOptions(b.name, b.weapon || '')+'</select>' : '')
+      + (b.task === 'weapon' ? weaponIcon(b.weapon) + '<select class="mini wsel" data-kind="build" data-id="'+b.id+'" data-field="weapon" aria-label="Weapon for '+esc(b.name || 'general task')+'">'+weaponOptions(b.name, b.weapon || '')+'</select>' : '')
       + noteHTML('build', b, label)
       + '<span class="spacer"></span>'
       + '<button class="x" data-act="del-build" data-id="'+b.id+'" aria-label="Delete '+esc(label)+'">×</button></li>';
@@ -572,7 +606,7 @@ var CHAR_WEAPON = {
     html += '<div class="addbar">'
       + '<label class="field grow">Character '+comboInput('id="nb-name" data-combo="build"','Search characters','Character')+'</label>'
       + '<label class="field">Task <select id="nb-task">'+taskOptions(lastBuildTask)+'</select></label>'
-      + '<label class="field" id="nb-weapon-field"'+(lastBuildTask === 'weapon' ? '' : ' hidden')+'>Weapon <select id="nb-weapon">'+(lastBuildTask === 'weapon' ? weaponOptions('', '') : '')+'</select></label>'
+      + '<label class="field" id="nb-weapon-field"'+(lastBuildTask === 'weapon' ? '' : ' hidden')+'>Weapon <span id="nb-weapon-icon"></span><select id="nb-weapon">'+(lastBuildTask === 'weapon' ? weaponOptions('', '') : '')+'</select></label>'
       + '<label class="field grow">Note <input type="text" id="nb-note" data-enter="add-build" placeholder="Optional"></label>'
       + '<button class="btn primary" data-act="add-build">Add task</button></div>';
     var open = state.builds.filter(function(b){ return !b.done; });
@@ -592,12 +626,12 @@ var CHAR_WEAPON = {
     var n = teamCount(p.name);
     return '<li class="card pitem" data-id="'+p.id+'">'
       + '<div class="prow"><span class="grip" aria-hidden="true">⠇</span>'
-      + '<span class="pname">'+esc(p.name)+'</span>'
-      + '<span class="uses">'+(n ? n+(n===1?' team':' teams') : '')+'</span>'
+      + charIcon(p.name) + '<span class="pname">'+esc(p.name)+'</span><span class="grow"></span>'
       + '<select class="mini" data-kind="pull" data-id="'+p.id+'" data-field="tier" aria-label="Tier of '+esc(p.name)+'" title="Tier">'+tierOptions(p.tier, true)+'</select>'
       + '<button class="btn small" data-act="pulled" data-id="'+p.id+'" title="Got them. Moves them to Build.">Got it</button>'
       + '<button class="x" data-act="del-pull" data-id="'+p.id+'" aria-label="Remove '+esc(p.name)+'">×</button></div>'
-      + noteHTML('pull', p, p.name)
+      + '<div class="prow2">' + noteHTML('pull', p, p.name)
+      + '<span class="uses">'+(n ? 'In '+n+(n===1?' team':' teams') : 'Not in a team')+'</span></div>'
       + '</li>';
   }
 
@@ -610,7 +644,7 @@ var CHAR_WEAPON = {
     html += '<div class="pull-cols">';
     TIERS.forEach(function(tier){
       var items = state.pulls.filter(function(p){ return p.tier === tier; });
-      html += '<section class="pcol"><div class="pcol-head">'+badge(tier)+'<h2>'+TIER_HINT[tier]+'</h2><span class="count">'+items.length+'</span></div>'
+      html += '<section class="pcol t'+tier+'"><div class="pcol-head">'+badge(tier)+'<h2>'+TIER_HINT[tier]+'</h2><span class="count">'+items.length+'</span></div>'
         + '<ul class="plist" data-tier="'+tier+'">'+items.map(pullHTML).join('')+'</ul></section>';
     });
     return html + '</div>';
@@ -755,7 +789,7 @@ var CHAR_WEAPON = {
       var st = o.isNew ? '' : statusOf(o.name);
       var tag = (!o.isNew && st !== 'done' && combo.input.dataset.combo !== 'pull') ? '<span class="tag '+st+'">'+STATUS[st].short+'</span>' : '';
       return '<li role="option" id="co-'+i+'" data-i="'+i+'" class="'+(o.isNew?'new':'')+'" aria-selected="'+(i===combo.idx)+'">'
-        + (o.isNew ? 'Add “'+esc(o.name)+'” as a new character' : hl(o.name, q)) + tag + '</li>';
+        + (o.isNew ? 'Add “'+esc(o.name)+'” as a new character' : charIcon(o.name) + '<span>' + hl(o.name, q) + '</span>') + tag + '</li>';
     }).join('') : '<li class="none">No matches</li>';
     if(combo.idx >= 0) combo.input.setAttribute('aria-activedescendant','co-'+combo.idx); else combo.input.removeAttribute('aria-activedescendant');
     var sel = list.querySelector('[aria-selected="true"]');
@@ -927,6 +961,7 @@ var CHAR_WEAPON = {
   app.addEventListener('change', function(e){
     var el = e.target, kind = el.dataset && el.dataset.kind;
     if(el.id === 'nb-task'){ lastBuildTask = el.value; syncWeaponField(); return; }
+    if(el.id === 'nb-weapon'){ document.getElementById('nb-weapon-icon').innerHTML = weaponIcon(el.value); return; }
     if(el.id === 'nb-name'){ syncWeaponField(); return; }
     if(!kind) return;
     var coll = kind === 'team' ? state.teams : kind === 'pull' ? state.pulls : state.builds;
