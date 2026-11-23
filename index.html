@@ -40,7 +40,7 @@
 :root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
 html{ scroll-padding-top:env(safe-area-inset-top,0px); }
 *,*::before,*::after{ box-sizing:inherit; }
-body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.45; min-height:100vh; }
+body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.45; min-height:100vh; position:relative; }
 button,input,select,textarea{ font:inherit; color:inherit; }
 button{ cursor:pointer; }
 :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
@@ -56,18 +56,37 @@ nav.tabs a[aria-current="page"]{ color:var(--ink); border-bottom-color:var(--acc
 nav.tabs a:hover{ color:var(--ink); }
 
 h2{ font-family:var(--font-display); font-weight:700; font-size:1.3rem; margin:0; letter-spacing:-0.01em; }
-.hint{ color:var(--muted); font-size:0.92rem; margin:0 0 18px; max-width:70ch; }
+.hint{ color:var(--muted); font-size:0.92rem; margin:0 0 18px; max-width:72ch; }
 .empty{ color:var(--muted); border:1px dashed var(--line); border-radius:10px; padding:16px; margin:0; }
 
 .btn{ background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:7px 13px; font-weight:600; }
 .btn:hover{ border-color:var(--accent); }
 .btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
 .btn.quiet{ background:transparent; border-color:transparent; color:var(--muted); text-decoration:underline; padding-left:6px; padding-right:6px; }
+.btn.small{ padding:3px 10px; font-size:0.85rem; }
 .x{ background:transparent; border:0; color:var(--muted); font-size:1.2rem; line-height:1; padding:2px 7px; border-radius:6px; }
 .x:hover{ color:var(--pull); background:var(--pull-bg); }
 
 input[type="text"],input:not([type]),select{ background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:7px 10px; min-width:0; }
-input::placeholder{ color:var(--muted); opacity:.85; }
+input::placeholder,textarea::placeholder{ color:var(--muted); opacity:.85; }
+
+/* small, quiet select (tier / task) */
+select.mini{ font-size:0.78rem; padding:1px 4px; border-radius:6px; border-color:transparent; background:transparent; color:var(--muted); font-weight:600; }
+select.mini:hover,select.mini:focus{ border-color:var(--line); background:var(--surface); color:var(--ink); }
+
+/* drag */
+.grip{ cursor:grab; color:var(--muted); user-select:none; touch-action:none; padding:0 2px; font-size:1rem; line-height:1; letter-spacing:-2px; opacity:.7; }
+.grip:hover{ opacity:1; color:var(--ink); }
+.sortable-ghost{ opacity:.35; }
+.sortable-drag{ box-shadow:0 8px 24px rgba(0,0,0,.18); }
+.dragging, .dragging *{ cursor:grabbing !important; }
+
+/* expanding note */
+.note{ display:block; resize:none; overflow:hidden; font-family:inherit; font-size:0.78rem; line-height:1.3; height:24px; padding:3px 8px; width:7.5rem; max-width:100%;
+  border:1px dashed var(--line); border-radius:6px; background:transparent; color:var(--muted); }
+.note:hover{ border-color:var(--muted); }
+.note:focus,.note.has{ width:100%; font-size:0.88rem; color:var(--ink); border-style:solid; background:var(--surface-2); }
+.note.has:not(:focus){ border-color:transparent; }
 
 /* tier sections */
 .tier-block{ margin-bottom:34px; }
@@ -76,11 +95,22 @@ input::placeholder{ color:var(--muted); opacity:.85; }
 .badge.t1{ color:var(--gold); background:var(--gold-bg); border-color:var(--gold); }
 .tier-head .grow{ flex:1; }
 
+/* legend */
+.legend{ display:inline-flex; flex-wrap:wrap; gap:4px 12px; margin-left:4px; }
+.sw{ display:inline-flex; align-items:center; gap:5px; color:var(--ink); }
+.sw::before{ content:""; width:12px; height:12px; border-radius:3px; border:1.5px solid; }
+.sw.pull::before{ background:var(--pull-bg); border-color:var(--pull); }
+.sw.build::before{ background:var(--build-bg); border-color:var(--build); }
+.sw.done::before{ background:var(--done-bg); border-color:var(--done); }
+
 /* teams */
-.team-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr)); gap:16px; }
+.team-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr)); gap:16px; min-height:64px; }
+.team-grid:empty{ border:1px dashed var(--line); border-radius:12px; }
+.team-grid:empty::before{ content:"No teams in this tier yet. Add one, or drag a team here."; color:var(--muted); padding:20px 16px; }
 .card{ background:var(--surface); border:1px solid var(--line); border-radius:12px; }
 .team{ padding:14px; display:flex; flex-direction:column; gap:12px; }
-.team-top{ display:flex; gap:8px; align-items:center; }
+.team-top{ display:flex; gap:6px; align-items:center; }
+.team-top .grip{ font-size:1.15rem; padding:4px 2px; }
 .team-top .name{ flex:1; font-weight:600; border-color:transparent; background:transparent; padding-left:4px; }
 .team-top .name:hover,.team-top .name:focus{ border-color:var(--line); background:var(--surface-2); }
 .slots{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
@@ -88,56 +118,62 @@ input::placeholder{ color:var(--muted); opacity:.85; }
 .slot.s-pull{ border-top-color:var(--pull); }
 .slot.s-build{ border-top-color:var(--build); }
 .slot.s-done{ border-top-color:var(--done); }
-.chips{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:5px; }
-.chip{ display:inline-flex; align-items:center; border-radius:999px; background:var(--surface); border:1px solid var(--line); max-width:100%; }
+.chips{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:5px; min-height:30px; }
+.chip{ display:inline-flex; align-items:center; border-radius:999px; background:var(--surface); border:1px solid var(--line); max-width:100%; cursor:grab; }
 .chip.main{ flex-basis:100%; border-radius:8px; border-width:1.5px; }
-.chip.main .chip-name{ font-weight:600; font-size:1rem; }
-.chip:not(.main) .chip-name{ font-size:0.86rem; color:var(--muted); }
-.chip-name{ background:none; border:0; padding:4px 4px 4px 8px; text-align:left; overflow-wrap:anywhere; }
-.chip:not(.main) .chip-name:hover{ color:var(--ink); text-decoration:underline; }
-.chip .glyph{ margin-right:5px; }
-.chip.st-pull .glyph{ color:var(--pull); } .chip.st-build .glyph{ color:var(--build); } .chip.st-done .glyph{ color:var(--done); }
+.chip.main .chip-name{ font-weight:600; font-size:1rem; color:var(--ink); }
+.chip:not(.main) .chip-name{ font-size:0.86rem; color:var(--ink); }
+.chip.st-pull{ background:var(--pull-bg); border-color:var(--pull); }
+.chip.st-build{ background:var(--build-bg); border-color:var(--build); }
+.chip.st-done{ background:var(--done-bg); border-color:var(--done); }
+.chip-name{ padding:4px 4px 4px 9px; text-align:left; overflow-wrap:anywhere; flex:1; user-select:none; }
+.chip:not(.main) .chip-name:hover{ text-decoration:underline; }
 .chip-x{ background:none; border:0; color:var(--muted); padding:2px 7px 2px 3px; font-size:1rem; line-height:1; }
 .chip-x:hover{ color:var(--pull); }
-.slot-add{ display:flex; gap:4px; margin-top:auto; }
-.slot-add input{ flex:1; min-width:0; font-size:0.86rem; padding:5px 8px; }
-.slot-add button{ border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:0 9px; font-weight:600; }
-.slot-add button:hover{ border-color:var(--accent); }
+.slot-add{ margin-top:auto; }
+.slot-add input{ width:100%; font-size:0.86rem; padding:5px 8px; }
 .verdict{ font-size:0.9rem; margin:0; padding:7px 10px; border-radius:8px; }
 .verdict.ready{ background:var(--done-bg); color:var(--done); font-weight:600; }
 .verdict.wait{ background:var(--surface-2); color:var(--muted); }
 .verdict b{ color:var(--ink); font-weight:600; }
+.team-top select{ font-size:0.85rem; padding:4px 6px; }
 
-/* roster */
-.addbar{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
-.addbar input{ flex:1 1 200px; }
-.cols{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; align-items:start; }
-.col{ background:var(--surface-2); border-radius:12px; padding:14px; border-top:5px solid var(--line); }
-.col.st-pull{ border-top-color:var(--pull); } .col.st-build{ border-top-color:var(--build); } .col.st-done{ border-top-color:var(--done); }
-.col-head{ display:flex; align-items:baseline; gap:8px; margin-bottom:12px; }
-.col-head .glyph{ font-size:1.1rem; }
-.col.st-pull .glyph{ color:var(--pull); } .col.st-build .glyph{ color:var(--build); } .col.st-done .glyph{ color:var(--done); }
+/* add bars */
+.addbar{ display:flex; flex-wrap:wrap; gap:8px 10px; margin-bottom:22px; align-items:center; }
+.field{ display:flex; align-items:center; gap:6px; font-weight:600; font-size:0.9rem; }
+.field.grow{ flex:1 1 220px; }
+.field.grow input{ flex:1; }
+.field input,.field select{ font-weight:400; }
+
+/* pull */
+.pull-cols{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; align-items:start; }
+.pcol{ background:var(--surface-2); border-radius:12px; padding:12px; border-top:5px solid var(--pull); }
+.pcol-head{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.pcol-head h2{ font-size:1.1rem; }
 .count{ margin-left:auto; font-weight:600; color:var(--muted); }
-.tier-label{ margin:14px 0 8px; display:flex; gap:8px; align-items:center; }
-.tier-label:first-of-type{ margin-top:0; }
-.char{ padding:10px 12px; margin-bottom:8px; display:flex; flex-direction:column; gap:8px; }
-.char-top{ display:flex; align-items:center; gap:8px; }
-.char-name{ font-size:1.05rem; }
-.uses{ font-size:0.82rem; color:var(--muted); margin-right:auto; }
-.char-ctl{ display:flex; gap:6px; }
-.char-ctl select{ flex:1; font-size:0.88rem; padding:5px 8px; }
-.note{ width:100%; font-size:0.9rem; padding:5px 8px; border-color:transparent; background:transparent; }
-.note:hover,.note:focus{ border-color:var(--line); background:var(--surface-2); }
-.col-empty{ color:var(--muted); font-size:0.92rem; margin:0; }
+.plist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; min-height:56px; }
+.plist:empty{ border:1px dashed var(--line); border-radius:10px; }
+.plist:empty::before{ content:"Drag characters here"; color:var(--muted); font-size:0.88rem; padding:16px 12px; }
+.pitem{ padding:8px 10px; display:flex; flex-direction:column; gap:6px; cursor:grab; }
+.prow{ display:flex; align-items:center; gap:6px; }
+.pname{ font-weight:600; }
+.uses{ font-size:0.78rem; color:var(--muted); margin-right:auto; white-space:nowrap; }
 
-/* todo */
-.todo-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
-.todo{ display:flex; align-items:center; gap:10px; padding:10px 12px; flex-wrap:wrap; }
-.todo input[type="checkbox"]{ width:20px; height:20px; accent-color:var(--accent); flex:none; }
-.todo .t-text{ font-weight:600; min-width:120px; }
-.todo.done .t-text{ text-decoration:line-through; color:var(--muted); }
-.todo .note{ flex:1 1 180px; width:auto; }
-.todo select{ font-size:0.88rem; padding:5px 8px; }
+/* build */
+.blist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.bitem{ display:flex; align-items:center; gap:8px 10px; padding:8px 10px; flex-wrap:wrap; }
+.bitem.open{ cursor:grab; }
+.bitem input[type="checkbox"]{ width:19px; height:19px; accent-color:var(--accent); flex:none; margin:0; cursor:pointer; }
+.bname{ font-weight:600; min-width:7rem; }
+.bname.general{ color:var(--muted); font-weight:500; font-style:italic; }
+.bitem .note{ flex:0 0 7.5rem; }
+.bitem .note:focus,.bitem .note.has{ flex:1 1 220px; width:auto; }
+.bitem .spacer{ flex:1; }
+.bitem .note:focus ~ .spacer,.bitem .note.has ~ .spacer{ display:none; }
+.bitem.done{ opacity:.55; background:transparent; }
+.bitem.done .bname{ text-decoration:line-through; }
+.done-head{ display:flex; align-items:center; gap:10px; margin:26px 0 10px; color:var(--muted); }
+.done-head h2{ font-size:1.05rem; color:var(--muted); }
 
 footer.tools{ margin-top:40px; padding-top:16px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:var(--muted); font-size:0.9rem; }
 footer.tools span{ flex:1 1 280px; }
@@ -149,15 +185,28 @@ dialog p{ margin:0 0 12px; color:var(--muted); font-size:0.94rem; }
 dialog textarea{ width:100%; min-height:200px; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:10px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:0.8rem; resize:vertical; }
 dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
 
-#toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(18px + env(safe-area-inset-bottom,0px)); background:var(--ink); color:var(--bg); padding:10px 14px; border-radius:10px; display:none; align-items:center; gap:12px; max-width:92vw; z-index:50; box-shadow:0 6px 24px rgba(0,0,0,.25); }
-#toast.show{ display:flex; }
-#toast button{ background:transparent; border:1px solid currentColor; color:inherit; border-radius:6px; padding:3px 10px; font-weight:600; }
+/* character picker */
+#combo-list{ position:absolute; z-index:60; margin:0; padding:4px; list-style:none; background:var(--surface); border:1px solid var(--line); border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,.18); max-height:280px; overflow-y:auto; display:none; }
+#combo-list.show{ display:block; }
+#combo-list li{ padding:6px 10px; border-radius:6px; cursor:pointer; display:flex; gap:8px; align-items:baseline; }
+#combo-list li[aria-selected="true"]{ background:var(--surface-2); outline:1px solid var(--line); }
+#combo-list li mark{ background:none; color:inherit; font-weight:700; }
+#combo-list .tag{ margin-left:auto; font-size:0.75rem; font-weight:600; }
+#combo-list .tag.pull{ color:var(--pull); } #combo-list .tag.build{ color:var(--build); }
+#combo-list li.new{ color:var(--accent); font-weight:600; }
+#combo-list li.none{ color:var(--muted); cursor:default; }
 
-@media (max-width:900px){ .cols{ grid-template-columns:1fr; } }
+#toast{ position:fixed; right:calc(18px + env(safe-area-inset-right,0px)); bottom:calc(18px + env(safe-area-inset-bottom,0px)); background:var(--ink); color:var(--bg); padding:10px 14px; border-radius:10px; display:none; align-items:center; gap:12px; max-width:min(420px,calc(100vw - 32px)); z-index:70; box-shadow:0 6px 24px rgba(0,0,0,.25); }
+#toast.show{ display:flex; }
+#toast button{ background:transparent; border:1px solid currentColor; color:inherit; border-radius:6px; padding:3px 10px; font-weight:600; flex:none; }
+
+@media (max-width:900px){ .pull-cols{ grid-template-columns:1fr; } }
 @media (max-width:520px){
-  .wrap{ padding:18px 14px 80px; }
+  .wrap{ padding:18px 16px 80px; }
   .slots{ grid-template-columns:1fr; }
   .slot{ min-height:0; }
+  #toast{ right:16px; left:16px; max-width:none; }
 }
 </style>
 </head>
@@ -172,8 +221,8 @@ dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
 
   <nav class="tabs" aria-label="Sections">
     <a href="#teams" data-tab="teams">Teams</a>
-    <a href="#roster" data-tab="roster">Pull &amp; build</a>
-    <a href="#todo" data-tab="todo">To-do</a>
+    <a href="#build" data-tab="build">Build</a>
+    <a href="#pull" data-tab="pull">Pull</a>
   </nav>
 
   <main id="app"></main>
@@ -185,7 +234,7 @@ dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
   </footer>
 </div>
 
-<datalist id="roster-names"></datalist>
+<ul id="combo-list" role="listbox" aria-label="Characters"></ul>
 
 <dialog id="backup">
   <h2>Back up or restore</h2>
@@ -200,86 +249,175 @@ dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
 
 <div id="toast" role="status" aria-live="polite"><span id="toast-msg"></span><button id="toast-undo" data-toast="undo" hidden>Undo</button></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <script>
+/* ============================================================
+   Character list. Add new characters here as they release.
+   Last checked: Nov 2026 (version 3.8).
+   ============================================================ */
+var CHARACTERS = [
+  // Glacio
+  'Sanhua','Baizhi','Lingyang','Zhezhi','Youhu','Carlotta','Lucilla','Hiyuki','Suisui',
+  // Fusion
+  'Chixia','Encore','Mortefi','Changli','Brant','Lupa','Galbrena','Mornye','Aemeath','Denia','Jingran',
+  // Electro
+  'Calcharo','Yinlin','Yuanwu','Xiangli Yao','Lumi','Augusta','Buling','Rebecca','Hsin','Suoming','Rover (Electro)',
+  // Aero
+  'Yangyang','Aalto','Jiyan','Jianxin','Ciaccona','Cartethyia','Iuno','Qiuyuan','Sigrika','Qingxiao','Rover (Aero)',
+  // Spectro
+  'Verina','Jinhsi','Shorekeeper','Phoebe','Zani','Lynae','Luuk Herssen','Lucy','Lily','Rover (Spectro)',
+  // Havoc
+  'Taoqi','Danjin','Camellya','Roccia','Cantarella','Phrolova','Chisa','Yangyang: Xuanling','Rover (Havoc)'
+];
+// Other spellings people type. Lowercase key -> name in the list above.
+var ALIASES = {
+  'arover':'Rover (Aero)', 'aero rover':'Rover (Aero)',
+  'srover':'Rover (Spectro)', 'spectro rover':'Rover (Spectro)',
+  'hrover':'Rover (Havoc)', 'havoc rover':'Rover (Havoc)',
+  'erover':'Rover (Electro)', 'electro rover':'Rover (Electro)',
+  'the shorekeeper':'Shorekeeper', 'sk':'Shorekeeper',
+  'xuanling':'Yangyang: Xuanling', 'yangyang xuanling':'Yangyang: Xuanling',
+  'xiangliyao':'Xiangli Yao', 'xly':'Xiangli Yao', 'luuk':'Luuk Herssen'
+};
+
 (function(){
-  var KEY = 'wuwa-planner-v1';
+  var KEY = 'wuwa-planner-v2', OLD_KEY = 'wuwa-planner-v1';
   var TIERS = [1,2,3];
   var TIER_NAME = {1:'Tier 1',2:'Tier 2',3:'Tier 3'};
   var TIER_HINT = {1:'Top priority',2:'Next up',3:'Someday'};
   var STATUS = {
-    pull:{label:'Need to pull', short:'pull', glyph:'\u25CB'},
-    build:{label:'Need to build', short:'build', glyph:'\u25D0'},
-    done:{label:'Ready', short:'ready', glyph:'\u25CF'}
+    pull:{label:'Need to pull', short:'pull'},
+    build:{label:'Need to build', short:'build'},
+    done:{label:'Ready', short:'ready'}
   };
   var RANK = {done:0, build:1, pull:2};
+  var TASKS = [['level','Level'],['weapon','Weapon'],['skills','Skills'],['echoes','Echoes'],['other','Other']];
+  var TASK_NAME = {}; TASKS.forEach(function(t){ TASK_NAME[t[0]] = t[1]; });
 
   function uid(){ return 'x' + Math.random().toString(36).slice(2,10); }
   function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  function lc(s){ return String(s || '').trim().toLowerCase(); }
 
-  function seed(){
+  var DB_LC = {};
+  CHARACTERS.forEach(function(n){ DB_LC[n.toLowerCase()] = n; });
+
+  /* ---------- data ---------- */
+  // The original starting notes, in the old format. Migrated on load.
+  function seedV1(){
     var chars = [], ids = {};
-    function add(name,status,tier,note){ var c = {id:uid(), name:name, status:status, tier:tier, note:note||''}; chars.push(c); ids[name] = c.id; }
-    add('Shorekeeper','pull',1);
-    add('Hsin','pull',1);
-    add('Suoming','pull',1);
-    add('Denia','pull',2);
-    add('Lupa','pull',2);
-    add('Chisa','pull',2);
-    add('Lily','pull',2);
-    add('Hiyuki','build',1);
-    add('Lucilla','build',1);
-    add('Suisui','build',1);
-    add('Sigrika','build',1);
-    add('Qiuyuan','build',1);
-    add('Buling','build',2);
-    add('Verina','build',2);
+    function add(name,status,tier){ var c = {id:uid(), name:name, status:status, tier:tier, note:''}; chars.push(c); ids[name] = c.id; }
+    add('Shorekeeper','pull',1); add('Hsin','pull',1); add('Suoming','pull',1);
+    add('Denia','pull',2); add('Lupa','pull',2); add('Chisa','pull',2); add('Lily','pull',2);
+    add('Hiyuki','build',1); add('Lucilla','build',1); add('Suisui','build',1); add('Sigrika','build',1); add('Qiuyuan','build',1);
+    add('Buling','build',2); add('Verina','build',2);
     ['Aemeath','Qingxiao','Mornye','Phrolova','Cantarella','ARover'].forEach(function(n){ add(n,'done',2); });
     function team(tier,slots){ return {id:uid(), name:'', tier:tier, slots:slots.map(function(s){ return s.map(function(n){ return ids[n]; }); })}; }
-    var teams = [
+    return {v:1, chars:chars, teams:[
       team(1,[['Hiyuki'],['Lucilla'],['Suisui']]),
       team(1,[['Sigrika'],['Qiuyuan'],['Shorekeeper','Verina','ARover']]),
       team(1,[['Phrolova'],['Qiuyuan'],['Buling','Cantarella','Shorekeeper','Verina','Sigrika']]),
       team(1,[['Hsin'],['Suoming'],['Shorekeeper','Lily']]),
       team(2,[['Aemeath'],['Denia'],['Lupa','Chisa']]),
       team(2,[['Qingxiao'],['Denia'],['Mornye']])
-    ];
-    var tasks = [
-      {id:uid(), text:'Variation \u00D73', note:'Suisui > Buling > Verina', tier:1, done:false},
+    ], tasks:[
+      {id:uid(), text:'Variation ×3', note:'Suisui > Buling > Verina', tier:1, done:false},
       {id:uid(), text:'Cosmic Ripples', note:'', tier:1, done:false}
-    ];
-    return {v:1, chars:chars, teams:teams, tasks:tasks};
+    ]};
   }
 
-  function valid(s){ return s && Array.isArray(s.chars) && Array.isArray(s.teams) && Array.isArray(s.tasks); }
+  function canonical(name){
+    var n = lc(name);
+    if(!n) return '';
+    if(DB_LC[n]) return DB_LC[n];
+    if(ALIASES[n]) return ALIASES[n];
+    return String(name).trim();
+  }
+
+  function migrateV1(s){
+    var nameOf = {};
+    s.chars.forEach(function(c){ nameOf[c.id] = canonical(c.name); });
+    var out = {v:2, teams:[], pulls:[], builds:[], custom:[]};
+    var byTier = s.chars.slice().sort(function(a,b){ return (a.tier||2) - (b.tier||2); });
+    byTier.forEach(function(c){
+      if(c.status === 'pull') out.pulls.push({id:uid(), name:nameOf[c.id], tier:c.tier||2, note:c.note||''});
+    });
+    byTier.forEach(function(c){
+      if(c.status === 'build') out.builds.push({id:uid(), name:nameOf[c.id], task:'level', note:c.note||'', done:false});
+    });
+    s.tasks.forEach(function(t){
+      out.builds.push({id:uid(), name:'', task:'other', note:t.text + (t.note ? ': ' + t.note : ''), done:!!t.done});
+    });
+    out.teams = s.teams.map(function(t){
+      return {id:t.id||uid(), name:t.name||'', tier:t.tier||1, slots:t.slots.map(function(sl){ return sl.map(function(id){ return nameOf[id]; }).filter(Boolean); })};
+    });
+    s.chars.forEach(function(c){ var n = nameOf[c.id]; if(!DB_LC[lc(n)] && out.custom.indexOf(n) === -1) out.custom.push(n); });
+    return out;
+  }
+
+  function validV1(s){ return s && Array.isArray(s.chars) && Array.isArray(s.teams) && Array.isArray(s.tasks); }
+  function validV2(s){ return s && s.v === 2 && Array.isArray(s.teams) && Array.isArray(s.pulls) && Array.isArray(s.builds); }
+  function normalize(s){ if(validV2(s)){ if(!Array.isArray(s.custom)) s.custom = []; return s; } if(validV1(s)) return migrateV1(s); return null; }
+  function seed(){ return migrateV1(seedV1()); }
+
   function load(){
     try{
       var raw = localStorage.getItem(KEY);
-      if(raw){ var s = JSON.parse(raw); if(valid(s)) return s; }
+      if(raw){ var s = normalize(JSON.parse(raw)); if(s) return s; }
+      var old = localStorage.getItem(OLD_KEY);
+      if(old){ var m = normalize(JSON.parse(old)); if(m) return m; }
     }catch(e){}
     return seed();
   }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
 
   var state = load();
-  var byId = {};
-  var undoSnap = null, toastTimer = null, focusSel = null;
   var tab = 'teams';
+  var focusSel = null, suppressComboOpen = false;
 
   function readHash(){
     var h = (location.hash || '').replace('#','');
-    tab = (h === 'roster' || h === 'todo' || h === 'teams') ? h : 'teams';
+    if(h === 'roster') h = 'pull';
+    if(h === 'todo') h = 'build';
+    tab = (h === 'build' || h === 'pull' || h === 'teams') ? h : 'teams';
+  }
+
+  /* ---------- status (derived from the Pull and Build lists) ---------- */
+  function statusOf(name){
+    var n = lc(name);
+    if(state.pulls.some(function(p){ return lc(p.name) === n; })) return 'pull';
+    if(state.builds.some(function(b){ return !b.done && lc(b.name) === n; })) return 'build';
+    return 'done';
+  }
+  function allNames(){
+    var seen = {}, out = [];
+    function add(n){ if(n && !seen[lc(n)]){ seen[lc(n)] = 1; out.push(n); } }
+    CHARACTERS.forEach(add);
+    (state.custom || []).forEach(add);
+    state.teams.forEach(function(t){ t.slots.forEach(function(s){ s.forEach(add); }); });
+    state.pulls.forEach(function(p){ add(p.name); });
+    state.builds.forEach(function(b){ add(b.name); });
+    return out.sort(function(a,b){ return a.localeCompare(b); });
+  }
+  function remember(name){
+    if(name && !DB_LC[lc(name)] && !state.custom.some(function(c){ return lc(c) === lc(name); })) state.custom.push(name);
   }
 
   /* ---------- helpers ---------- */
-  function tierOptions(cur){ return TIERS.map(function(t){ return '<option value="'+t+'"'+(t===cur?' selected':'')+'>'+TIER_NAME[t]+'</option>'; }).join(''); }
-  function statusOptions(cur){ return ['pull','build','done'].map(function(s){ return '<option value="'+s+'"'+(s===cur?' selected':'')+'>'+STATUS[s].label+'</option>'; }).join(''); }
+  function tierOptions(cur, short){ return TIERS.map(function(t){ return '<option value="'+t+'"'+(t===cur?' selected':'')+'>'+(short ? 'T'+t : TIER_NAME[t])+'</option>'; }).join(''); }
+  function taskOptions(cur){ return TASKS.map(function(t){ return '<option value="'+t[0]+'"'+(t[0]===cur?' selected':'')+'>'+t[1]+'</option>'; }).join(''); }
   function badge(t){ return '<span class="badge'+(t===1?' t1':'')+'">'+TIER_NAME[t]+'</span>'; }
-  function teamCount(id){ return state.teams.filter(function(t){ return t.slots.some(function(s){ return s.indexOf(id) !== -1; }); }).length; }
-  function findByName(name){ var n = name.trim().toLowerCase(); return state.chars.filter(function(c){ return c.name.toLowerCase() === n; })[0]; }
+  function teamCount(name){ var n = lc(name); return state.teams.filter(function(t){ return t.slots.some(function(s){ return s.some(function(x){ return lc(x) === n; }); }); }).length; }
+  function find(coll, id){ return coll.filter(function(x){ return x.id === id; })[0]; }
+  function noteHTML(kind, item, label){
+    return '<textarea class="note'+(item.note ? ' has' : '')+'" rows="1" data-kind="'+kind+'" data-id="'+item.id+'" data-field="note" placeholder="+ note" aria-label="Note for '+esc(label)+'">'+esc(item.note)+'</textarea>';
+  }
+  function comboInput(attrs, placeholder, label){
+    return '<input type="text" class="combo" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="combo-list" placeholder="'+placeholder+'" aria-label="'+label+'" '+attrs+'>';
+  }
 
   /* ---------- teams ---------- */
   function slotInfo(slot){
-    var opts = slot.map(function(id){ return byId[id]; }).filter(Boolean);
+    var opts = slot.map(function(n){ return {name:n, status:statusOf(n)}; });
     var best = opts.slice().sort(function(a,b){ return RANK[a.status] - RANK[b.status]; })[0];
     return {opts:opts, best:best, status: best ? best.status : 'empty'};
   }
@@ -288,169 +426,367 @@ dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
     var infos = t.slots.map(slotInfo);
     var waiting = [];
     infos.forEach(function(info,i){
-      if(info.status === 'empty'){ waiting.push('slot '+(i+1)+' is empty'); }
-      else if(info.status !== 'done'){ waiting.push('<b>'+esc(info.best.name)+'</b> ('+STATUS[info.status].short+')'); }
+      if(info.status === 'empty') waiting.push('slot '+(i+1)+' is empty');
+      else if(info.status !== 'done') waiting.push('<b>'+esc(info.best.name)+'</b> ('+STATUS[info.status].short+')');
     });
     var verdict = waiting.length
       ? '<p class="verdict wait">Waiting on '+waiting.join(', ')+'</p>'
       : '<p class="verdict ready">Ready to play</p>';
 
     var slotsHTML = t.slots.map(function(slot,si){
-      var info = infos[si];
-      var chips = info.opts.map(function(c,i){
-        return '<li class="chip st-'+c.status+(i===0?' main':'')+'">'
-          + '<button class="chip-name" data-act="promote" data-team="'+t.id+'" data-slot="'+si+'" data-char="'+c.id+'"'+(i? ' title="Make main pick"' : '')+'>'
-          + '<span class="glyph" aria-hidden="true">'+STATUS[c.status].glyph+'</span>'+esc(c.name)+'<span class="sr"> ('+STATUS[c.status].label+')</span></button>'
-          + '<button class="chip-x" data-act="rm-slot" data-team="'+t.id+'" data-slot="'+si+'" data-char="'+c.id+'" aria-label="Remove '+esc(c.name)+' from this slot">\u00D7</button></li>';
+      var chips = infos[si].opts.map(function(c,i){
+        return '<li class="chip st-'+c.status+(i===0?' main':'')+'" data-name="'+esc(c.name)+'">'
+          + '<span class="chip-name" role="button" tabindex="0" data-act="promote" data-team="'+t.id+'" data-slot="'+si+'" data-name="'+esc(c.name)+'"'+(i ? ' title="Click to make main pick, or drag to reorder"' : ' title="Drag to reorder"')+'>'
+          + esc(c.name)+'<span class="sr"> ('+STATUS[c.status].label+')</span></span>'
+          + '<button class="chip-x" data-act="rm-slot" data-team="'+t.id+'" data-slot="'+si+'" data-name="'+esc(c.name)+'" aria-label="Remove '+esc(c.name)+' from this slot">×</button></li>';
       }).join('');
-      return '<div class="slot s-'+info.status+'">'
-        + '<ul class="chips">'+chips+'</ul>'
-        + '<div class="slot-add"><input type="text" list="roster-names" placeholder="Add character" aria-label="Add character to slot '+(si+1)+'" data-enter="slot-add" data-team="'+t.id+'" data-slot="'+si+'">'
-        + '<button data-act="slot-add" data-team="'+t.id+'" data-slot="'+si+'" aria-label="Add to slot '+(si+1)+'">+</button></div></div>';
+      return '<div class="slot s-'+infos[si].status+'">'
+        + '<ul class="chips" data-team="'+t.id+'" data-slot="'+si+'">'+chips+'</ul>'
+        + '<div class="slot-add">'+comboInput('data-combo="slot" data-team="'+t.id+'" data-slot="'+si+'"','Add character','Add character to slot '+(si+1))+'</div></div>';
     }).join('');
 
-    return '<article class="card team">'
-      + '<div class="team-top"><input class="name" data-kind="team" data-id="'+t.id+'" data-field="name" value="'+esc(t.name)+'" placeholder="Name this team" aria-label="Team name">'
+    return '<article class="card team" data-id="'+t.id+'">'
+      + '<div class="team-top"><span class="grip team-grip" title="Drag to move this team" aria-hidden="true">⠇⠇</span>'
+      + '<input class="name" data-kind="team" data-id="'+t.id+'" data-field="name" value="'+esc(t.name)+'" placeholder="Name this team" aria-label="Team name">'
       + '<select data-kind="team" data-id="'+t.id+'" data-field="tier" aria-label="Team tier">'+tierOptions(t.tier)+'</select>'
-      + '<button class="x" data-act="del-team" data-id="'+t.id+'" aria-label="Delete team">\u00D7</button></div>'
+      + '<button class="x" data-act="del-team" data-id="'+t.id+'" aria-label="Delete team">×</button></div>'
       + '<div class="slots">'+slotsHTML+'</div>'
       + verdict
       + '</article>';
   }
 
   function teamsView(){
-    var html = '<p class="hint">Each column is one slot. The first name is the main pick, and the smaller names are swap-ins. Click a swap-in to make it the main pick. ○ means you need to pull, ◐ means you need to build, ● means ready.</p>';
+    var html = '<p class="hint">Each column is one slot. The top name is the main pick and the smaller names are swap-ins. Drag names to reorder them, or click a swap-in to make it the main pick. Drag a team by its handle to move it, including into another tier. '
+      + '<span class="legend"><span class="sw pull">Need to pull</span><span class="sw build">Need to build</span><span class="sw done">Ready</span></span></p>';
     TIERS.forEach(function(tier){
       var teams = state.teams.filter(function(t){ return t.tier === tier; });
-      if(!teams.length && tier === 3) return;
       html += '<section class="tier-block"><div class="tier-head">'+badge(tier)+'<h2>'+TIER_HINT[tier]+' teams</h2><span class="grow"></span>'
         + '<button class="btn" data-act="add-team" data-tier="'+tier+'">Add a '+TIER_NAME[tier]+' team</button></div>'
-        + (teams.length ? '<div class="team-grid">'+teams.map(teamHTML).join('')+'</div>' : '<p class="empty">No '+TIER_NAME[tier]+' teams yet. Add one to start planning.</p>')
+        + '<div class="team-grid" data-tier="'+tier+'">'+teams.map(teamHTML).join('')+'</div>'
         + '</section>';
     });
     return html;
   }
 
-  /* ---------- roster ---------- */
-  function charHTML(c){
-    var n = teamCount(c.id);
-    return '<article class="card char">'
-      + '<div class="char-top"><strong class="char-name">'+esc(c.name)+'</strong>'
-      + '<span class="uses">'+(n ? 'In '+n+(n===1?' team':' teams') : 'Not in a team')+'</span>'
-      + '<button class="x" data-act="del-char" data-id="'+c.id+'" aria-label="Delete '+esc(c.name)+'">\u00D7</button></div>'
-      + '<div class="char-ctl"><select data-kind="char" data-id="'+c.id+'" data-field="status" aria-label="Status of '+esc(c.name)+'">'+statusOptions(c.status)+'</select>'
-      + '<select data-kind="char" data-id="'+c.id+'" data-field="tier" aria-label="Tier of '+esc(c.name)+'">'+tierOptions(c.tier)+'</select></div>'
-      + '<input class="note" data-kind="char" data-id="'+c.id+'" data-field="note" value="'+esc(c.note)+'" placeholder="Add a note" aria-label="Note for '+esc(c.name)+'">'
-      + '</article>';
+  /* ---------- build ---------- */
+  function buildHTML(b){
+    var label = (b.name || 'General') + ' ' + TASK_NAME[b.task];
+    return '<li class="card bitem '+(b.done ? 'done' : 'open')+'" data-id="'+b.id+'">'
+      + (b.done ? '' : '<span class="grip" aria-hidden="true">⠇</span>')
+      + '<input type="checkbox" data-kind="build" data-id="'+b.id+'" data-field="done"'+(b.done?' checked':'')+' aria-label="Mark '+esc(label)+' as done">'
+      + '<span class="bname'+(b.name ? '' : ' general')+'">'+esc(b.name || 'General')+'</span>'
+      + '<select class="mini" data-kind="build" data-id="'+b.id+'" data-field="task" aria-label="Task for '+esc(b.name || 'general task')+'">'+taskOptions(b.task)+'</select>'
+      + noteHTML('build', b, label)
+      + '<span class="spacer"></span>'
+      + '<button class="x" data-act="del-build" data-id="'+b.id+'" aria-label="Delete '+esc(label)+'">×</button></li>';
   }
 
-  function rosterView(){
-    var html = '<p class="hint">Pull means you don’t own them yet. Build means you own them but they still need levels and gear. Change a character’s status and they move to the next column.</p>';
-    html += '<div class="addbar"><input type="text" id="nc-name" data-enter="add-char" placeholder="Character name" aria-label="Character name">'
-      + '<select id="nc-status" aria-label="Status">'+statusOptions('pull')+'</select>'
-      + '<select id="nc-tier" aria-label="Tier">'+tierOptions(1)+'</select>'
-      + '<button class="btn primary" data-act="add-char">Add character</button></div>';
-    html += '<div class="cols">';
-    ['pull','build','done'].forEach(function(st){
-      var list = state.chars.filter(function(c){ return c.status === st; });
-      html += '<section class="col st-'+st+'"><div class="col-head"><span class="glyph" aria-hidden="true">'+STATUS[st].glyph+'</span><h2>'+STATUS[st].label+'</h2><span class="count">'+list.length+'</span></div>';
-      if(!list.length){ html += '<p class="col-empty">Nobody here right now.</p>'; }
-      TIERS.forEach(function(tier){
-        var items = list.filter(function(c){ return c.tier === tier; });
-        if(!items.length) return;
-        html += '<div class="tier-label">'+badge(tier)+'</div>' + items.map(charHTML).join('');
-      });
-      html += '</section>';
+  function buildView(){
+    var html = '<p class="hint">What your characters still need. Pick a character and a task. Check it off when it’s done, and drag to reorder. Use <b>Other</b> for things like farming that aren’t tied to one character.</p>';
+    html += '<div class="addbar">'
+      + '<label class="field grow">Character '+comboInput('id="nb-name" data-combo="build"','Search characters','Character')+'</label>'
+      + '<label class="field">Task <select id="nb-task">'+taskOptions('level')+'</select></label>'
+      + '<label class="field grow">Note <input type="text" id="nb-note" data-enter="add-build" placeholder="Optional"></label>'
+      + '<button class="btn primary" data-act="add-build">Add task</button></div>';
+    var open = state.builds.filter(function(b){ return !b.done; });
+    var done = state.builds.filter(function(b){ return b.done; });
+    html += open.length
+      ? '<ul class="blist" id="build-open">'+open.map(buildHTML).join('')+'</ul>'
+      : '<p class="empty">Nothing left to build. Add a task above.</p>';
+    if(done.length){
+      html += '<div class="done-head"><h2>Finished</h2><span>'+done.length+'</span><span style="flex:1"></span><button class="btn small" data-act="clear-done">Clear finished</button></div>'
+        + '<ul class="blist">'+done.map(buildHTML).join('')+'</ul>';
+    }
+    return html;
+  }
+
+  /* ---------- pull ---------- */
+  function pullHTML(p){
+    var n = teamCount(p.name);
+    return '<li class="card pitem" data-id="'+p.id+'">'
+      + '<div class="prow"><span class="grip" aria-hidden="true">⠇</span>'
+      + '<span class="pname">'+esc(p.name)+'</span>'
+      + '<span class="uses">'+(n ? n+(n===1?' team':' teams') : '')+'</span>'
+      + '<select class="mini" data-kind="pull" data-id="'+p.id+'" data-field="tier" aria-label="Tier of '+esc(p.name)+'" title="Tier">'+tierOptions(p.tier, true)+'</select>'
+      + '<button class="btn small" data-act="pulled" data-id="'+p.id+'" title="Got them. Moves them to Build.">Got it</button>'
+      + '<button class="x" data-act="del-pull" data-id="'+p.id+'" aria-label="Remove '+esc(p.name)+'">×</button></div>'
+      + noteHTML('pull', p, p.name)
+      + '</li>';
+  }
+
+  function pullView(){
+    var html = '<p class="hint">Characters you don’t own yet. Drag to reorder, or drag into another tier. Choose <b>Got it</b> once you pull someone and they move to Build.</p>';
+    html += '<div class="addbar">'
+      + '<label class="field grow">Character '+comboInput('id="np-name" data-combo="pull"','Search characters','Character')+'</label>'
+      + '<label class="field">Tier <select id="np-tier">'+tierOptions(1)+'</select></label>'
+      + '<button class="btn primary" data-act="add-pull">Add character</button></div>';
+    html += '<div class="pull-cols">';
+    TIERS.forEach(function(tier){
+      var items = state.pulls.filter(function(p){ return p.tier === tier; });
+      html += '<section class="pcol"><div class="pcol-head">'+badge(tier)+'<h2>'+TIER_HINT[tier]+'</h2><span class="count">'+items.length+'</span></div>'
+        + '<ul class="plist" data-tier="'+tier+'">'+items.map(pullHTML).join('')+'</ul></section>';
     });
     return html + '</div>';
   }
 
-  /* ---------- to-do ---------- */
-  function taskHTML(t){
-    return '<li class="card todo'+(t.done?' done':'')+'">'
-      + '<input type="checkbox" data-kind="task" data-id="'+t.id+'" data-field="done"'+(t.done?' checked':'')+' aria-label="Mark '+esc(t.text)+' as done">'
-      + '<span class="t-text">'+esc(t.text)+'</span>'
-      + '<input class="note" data-kind="task" data-id="'+t.id+'" data-field="note" value="'+esc(t.note)+'" placeholder="Add a note" aria-label="Note for '+esc(t.text)+'">'
-      + '<select data-kind="task" data-id="'+t.id+'" data-field="tier" aria-label="Tier of '+esc(t.text)+'">'+tierOptions(t.tier)+'</select>'
-      + '<button class="x" data-act="del-task" data-id="'+t.id+'" aria-label="Delete '+esc(t.text)+'">\u00D7</button></li>';
-  }
-
-  function todoView(){
-    var html = '<p class="hint">Things like leveling skills, farming, or anything else that isn’t a pull or a build.</p>';
-    html += '<div class="addbar"><input type="text" id="nt-text" data-enter="add-task" placeholder="New task, like “Level Echo skills”" aria-label="New task">'
-      + '<select id="nt-tier" aria-label="Tier">'+tierOptions(1)+'</select>'
-      + '<button class="btn primary" data-act="add-task">Add task</button></div>';
-    var any = false;
-    TIERS.forEach(function(tier){
-      var items = state.tasks.filter(function(t){ return t.tier === tier; })
-        .sort(function(a,b){ return (a.done?1:0) - (b.done?1:0); });
-      if(!items.length) return;
-      any = true;
-      html += '<section class="tier-block"><div class="tier-head">'+badge(tier)+'<h2>'+TIER_HINT[tier]+'</h2></div><ul class="todo-list">'+items.map(taskHTML).join('')+'</ul></section>';
-    });
-    if(!any) html += '<p class="empty">Nothing on the list. Add a task above.</p>';
-    return html;
-  }
-
   /* ---------- render ---------- */
+  var sortables = [];
   function render(){
-    byId = {};
-    state.chars.forEach(function(c){ byId[c.id] = c; });
-    document.getElementById('roster-names').innerHTML = state.chars.map(function(c){ return '<option value="'+esc(c.name)+'"></option>'; }).join('');
+    closeCombo();
     Array.prototype.forEach.call(document.querySelectorAll('nav.tabs a'), function(a){
       if(a.dataset.tab === tab) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
     });
-    var app = document.getElementById('app');
-    app.innerHTML = tab === 'roster' ? rosterView() : tab === 'todo' ? todoView() : teamsView();
-    if(focusSel){ var el = app.querySelector(focusSel); if(el) el.focus(); focusSel = null; }
+    app.innerHTML = tab === 'build' ? buildView() : tab === 'pull' ? pullView() : teamsView();
+    Array.prototype.forEach.call(app.querySelectorAll('.note.has'), autosize);
+    initSortables();
+    if(focusSel){ var el = app.querySelector(focusSel); if(el){ suppressComboOpen = true; el.focus(); suppressComboOpen = false; } focusSel = null; }
   }
   function commit(){ save(); render(); }
+  function autosize(el){ el.style.height = 'auto'; el.style.height = (el.scrollHeight + 2) + 'px'; }
+
+  /* ---------- drag and drop ---------- */
+  function initSortables(){
+    sortables.forEach(function(s){ try{ s.destroy(); }catch(e){} });
+    sortables = [];
+    if(typeof Sortable === 'undefined') return;
+    var base = { animation:150, delayOnTouchOnly:true, delay:180, emptyInsertThreshold:40,
+      onStart:function(){ document.body.classList.add('dragging'); closeCombo(); },
+      onUnchoose:function(){ document.body.classList.remove('dragging'); } };
+    function make(el, opts){ var o = {}; for(var k in base) o[k] = base[k]; for(var j in opts) o[j] = opts[j]; sortables.push(Sortable.create(el, o)); }
+
+    // teams between tiers
+    Array.prototype.forEach.call(app.querySelectorAll('.team-grid'), function(el){
+      make(el, { group:'teams', handle:'.team-grip', draggable:'.team', onEnd:function(){
+        var order = [];
+        Array.prototype.forEach.call(app.querySelectorAll('.team-grid'), function(g){
+          Array.prototype.forEach.call(g.querySelectorAll(':scope > .team'), function(card){
+            var t = find(state.teams, card.dataset.id);
+            if(t){ t.tier = +g.dataset.tier; order.push(t); }
+          });
+        });
+        state.teams = order;
+        setTimeout(commit, 0);
+      }});
+    });
+
+    // characters within and between slots
+    Array.prototype.forEach.call(app.querySelectorAll('.chips'), function(el){
+      make(el, { group:'chips', draggable:'.chip', filter:'.chip-x', preventOnFilter:false, onEnd:function(evt){
+        [evt.from, evt.to].forEach(function(ul){
+          var t = find(state.teams, ul.dataset.team);
+          if(!t) return;
+          var seen = {}, names = [];
+          Array.prototype.forEach.call(ul.querySelectorAll('.chip'), function(li){
+            var n = li.dataset.name;
+            if(!seen[lc(n)]){ seen[lc(n)] = 1; names.push(n); }
+          });
+          t.slots[+ul.dataset.slot] = names;
+        });
+        setTimeout(commit, 0);
+      }});
+    });
+
+    // pull list between tiers
+    Array.prototype.forEach.call(app.querySelectorAll('.plist'), function(el){
+      make(el, { group:'pulls', draggable:'.pitem', filter:'input,select,button,textarea', preventOnFilter:false, onEnd:function(){
+        var order = [];
+        Array.prototype.forEach.call(app.querySelectorAll('.plist'), function(ul){
+          Array.prototype.forEach.call(ul.querySelectorAll('.pitem'), function(li){
+            var p = find(state.pulls, li.dataset.id);
+            if(p){ p.tier = +ul.dataset.tier; order.push(p); }
+          });
+        });
+        state.pulls = order;
+        setTimeout(commit, 0);
+      }});
+    });
+
+    // open build tasks. Finished tasks keep their old place in the list, so unchecking one puts it back where it was.
+    var bl = document.getElementById('build-open');
+    if(bl) make(bl, { draggable:'.bitem.open', filter:'input,select,button,textarea', preventOnFilter:false, onEnd:function(){
+      var newOpen = Array.prototype.map.call(bl.querySelectorAll('.bitem'), function(li){ return find(state.builds, li.dataset.id); }).filter(Boolean);
+      var k = 0;
+      state.builds = state.builds.map(function(b){ return b.done ? b : newOpen[k++]; });
+      setTimeout(commit, 0);
+    }});
+  }
 
   /* ---------- toast / undo ---------- */
-  function toast(msg, canUndo){
+  var toastTimer = null, undoFn = null;
+  function toast(msg, onUndo){
     var t = document.getElementById('toast');
     document.getElementById('toast-msg').textContent = msg;
-    document.getElementById('toast-undo').hidden = !canUndo;
+    undoFn = onUndo || null;
+    document.getElementById('toast-undo').hidden = !onUndo;
     t.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, canUndo ? 7000 : 3500);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); undoFn = null; }, onUndo ? 7000 : 3500);
   }
-  function snapshot(){ undoSnap = JSON.stringify(state); }
+  function withUndo(msg, fn){
+    var snap = JSON.stringify(state);
+    fn(); commit();
+    toast(msg, function(){ state = JSON.parse(snap); commit(); });
+  }
+
+  /* ---------- character picker ---------- */
+  var list = document.getElementById('combo-list');
+  var combo = {input:null, items:[], idx:-1};
+
+  function matches(q){
+    var names = allNames(), n = lc(q);
+    if(!n) return names.map(function(x){ return {name:x}; });
+    var scored = [];
+    names.forEach(function(x){
+      var l = x.toLowerCase(), s = -1;
+      if(l.indexOf(n) === 0) s = 0;
+      else if(l.split(/[\s(:]+/).some(function(w){ return w.indexOf(n) === 0; })) s = 1;
+      else if(l.indexOf(n) !== -1) s = 2;
+      if(s !== -1) scored.push({name:x, s:s});
+    });
+    Object.keys(ALIASES).forEach(function(a){
+      if(a.indexOf(n) === 0 && !scored.some(function(o){ return o.name === ALIASES[a]; })) scored.push({name:ALIASES[a], s:1});
+    });
+    scored.sort(function(a,b){ return a.s - b.s || a.name.localeCompare(b.name); });
+    return scored;
+  }
+  function hl(name, q){
+    var i = q ? name.toLowerCase().indexOf(q.toLowerCase()) : -1;
+    if(i < 0) return esc(name);
+    return esc(name.slice(0,i)) + '<mark>' + esc(name.slice(i, i+q.length)) + '</mark>' + esc(name.slice(i+q.length));
+  }
+  function refreshCombo(){
+    var q = combo.input.value.trim();
+    var items = matches(q);
+    var exact = q && (DB_LC[lc(q)] || ALIASES[lc(q)] || items.some(function(o){ return lc(o.name) === lc(q); }));
+    if(q && !exact) items.push({name:q, isNew:true});
+    combo.items = items;
+    combo.idx = q ? 0 : -1;
+    paintCombo(q);
+  }
+  function paintCombo(q){
+    list.innerHTML = combo.items.length ? combo.items.map(function(o,i){
+      var st = o.isNew ? '' : statusOf(o.name);
+      var tag = (!o.isNew && st !== 'done' && combo.input.dataset.combo !== 'pull') ? '<span class="tag '+st+'">'+STATUS[st].short+'</span>' : '';
+      return '<li role="option" id="co-'+i+'" data-i="'+i+'" class="'+(o.isNew?'new':'')+'" aria-selected="'+(i===combo.idx)+'">'
+        + (o.isNew ? 'Add “'+esc(o.name)+'” as a new character' : hl(o.name, q)) + tag + '</li>';
+    }).join('') : '<li class="none">No matches</li>';
+    if(combo.idx >= 0) combo.input.setAttribute('aria-activedescendant','co-'+combo.idx); else combo.input.removeAttribute('aria-activedescendant');
+    var sel = list.querySelector('[aria-selected="true"]');
+    if(sel) sel.scrollIntoView({block:'nearest'});
+  }
+  function placeCombo(){
+    var r = combo.input.getBoundingClientRect();
+    var w = Math.max(r.width, 220);
+    var left = Math.min(r.left, document.documentElement.clientWidth - w - 8);
+    list.style.width = w + 'px';
+    list.style.left = (Math.max(8, left) + window.scrollX) + 'px';
+    var below = window.innerHeight - r.bottom;
+    if(below < 200 && r.top > below){
+      list.style.top = ''; list.classList.add('show');
+      list.style.top = (r.top + window.scrollY - list.offsetHeight - 4) + 'px';
+    } else {
+      list.style.top = (r.bottom + window.scrollY + 4) + 'px';
+      list.classList.add('show');
+    }
+  }
+  function openCombo(input){
+    combo.input = input;
+    input.setAttribute('aria-expanded','true');
+    refreshCombo();
+    list.classList.add('show');
+    placeCombo();
+  }
+  function closeCombo(){
+    if(combo.input) combo.input.setAttribute('aria-expanded','false');
+    list.classList.remove('show');
+    combo.input = null;
+  }
+  function chooseCombo(i){
+    var o = combo.items[i];
+    if(!o || !combo.input) return;
+    var input = combo.input;
+    closeCombo();
+    picked(input, o.isNew ? o.name.trim() : o.name);
+  }
+  function picked(input, name){
+    name = canonical(name);
+    if(!name) return;
+    var kind = input.dataset.combo;
+    if(kind === 'slot') addToSlot(input.dataset.team, +input.dataset.slot, name);
+    else if(kind === 'pull') addPull(name);
+    else if(kind === 'build'){ input.value = name; var t = document.getElementById('nb-task'); if(t) t.focus(); }
+  }
+
+  document.addEventListener('focusin', function(e){
+    if(e.target.classList && e.target.classList.contains('combo') && !suppressComboOpen) openCombo(e.target);
+  });
+  document.addEventListener('focusout', function(e){
+    if(e.target === combo.input) setTimeout(function(){ if(combo.input && document.activeElement !== combo.input) closeCombo(); }, 120);
+  });
+  document.addEventListener('input', function(e){
+    if(e.target.classList.contains('combo')){ if(combo.input !== e.target) openCombo(e.target); else { refreshCombo(); placeCombo(); } }
+    if(e.target.classList.contains('note')){ e.target.classList.toggle('has', !!e.target.value); autosize(e.target); }
+  });
+  document.addEventListener('keydown', function(e){
+    var el = e.target;
+    if(el.classList && el.classList.contains('combo')){
+      if(!combo.input && (e.key === 'ArrowDown' || e.key === 'ArrowUp')){ openCombo(el); e.preventDefault(); return; }
+      if(e.key === 'ArrowDown'){ e.preventDefault(); combo.idx = Math.min(combo.idx + 1, combo.items.length - 1); paintCombo(el.value.trim()); }
+      else if(e.key === 'ArrowUp'){ e.preventDefault(); combo.idx = Math.max(combo.idx - 1, 0); paintCombo(el.value.trim()); }
+      else if(e.key === 'Enter'){
+        e.preventDefault();
+        if(combo.input && combo.idx >= 0) chooseCombo(combo.idx);
+        else if(el.dataset.combo === 'build') addBuild();
+        else if(el.value.trim()){ closeCombo(); picked(el, el.value); }
+      }
+      else if(e.key === 'Escape'){ closeCombo(); }
+      else if(e.key === 'Tab'){ closeCombo(); }
+      return;
+    }
+    if(el.classList && el.classList.contains('note') && e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); el.blur(); return; }
+    if(e.key === 'Enter' && el.dataset && el.dataset.enter === 'add-build'){ e.preventDefault(); addBuild(); return; }
+    if((e.key === 'Enter' || e.key === ' ') && el.dataset && el.dataset.act === 'promote'){ e.preventDefault(); el.click(); }
+  });
+  list.addEventListener('mousedown', function(e){ e.preventDefault(); });
+  list.addEventListener('click', function(e){ var li = e.target.closest('li[data-i]'); if(li) chooseCombo(+li.dataset.i); });
+  window.addEventListener('resize', closeCombo);
 
   /* ---------- actions ---------- */
-  function addToSlot(teamId, slotIdx, value){
-    var name = (value || '').trim();
-    if(!name) return;
-    var t = state.teams.filter(function(x){ return x.id === teamId; })[0];
-    if(!t) return;
-    var c = findByName(name);
-    if(!c){
-      c = {id:uid(), name:name, status:'pull', tier:2, note:''};
-      state.chars.push(c);
-      toast(name+' is new, so it was added to your pull list.', false);
-    }
+  function addToSlot(teamId, slotIdx, name){
+    var t = find(state.teams, teamId);
+    if(!t || !name) return;
+    remember(name);
     var slot = t.slots[slotIdx];
-    if(slot.indexOf(c.id) === -1) slot.push(c.id);
+    if(!slot.some(function(x){ return lc(x) === lc(name); })) slot.push(name);
     focusSel = 'input[data-team="'+teamId+'"][data-slot="'+slotIdx+'"]';
     commit();
   }
 
-  function addChar(){
-    var nameEl = document.getElementById('nc-name');
-    var name = nameEl.value.trim();
-    if(!name){ toast('Type a character name first.', false); nameEl.focus(); return; }
-    if(findByName(name)){ toast(name+' is already on your roster.', false); return; }
-    state.chars.push({id:uid(), name:name, status:document.getElementById('nc-status').value, tier:+document.getElementById('nc-tier').value, note:''});
-    focusSel = '#nc-name';
+  function addPull(name){
+    var el = document.getElementById('np-name');
+    name = canonical(name != null ? name : (el && el.value));
+    if(!name){ toast('Pick a character first.'); if(el) el.focus(); return; }
+    if(state.pulls.some(function(p){ return lc(p.name) === lc(name); })){ toast(name + ' is already on your pull list.'); return; }
+    remember(name);
+    var tier = +(document.getElementById('np-tier') || {value:1}).value;
+    state.pulls.push({id:uid(), name:name, tier:tier, note:''});
+    focusSel = '#np-name';
     commit();
   }
 
-  function addTask(){
-    var el = document.getElementById('nt-text');
-    var text = el.value.trim();
-    if(!text){ toast('Type a task first.', false); el.focus(); return; }
-    state.tasks.push({id:uid(), text:text, note:'', tier:+document.getElementById('nt-tier').value, done:false});
-    focusSel = '#nt-text';
+  function addBuild(){
+    var el = document.getElementById('nb-name');
+    var name = canonical(el.value);
+    var task = document.getElementById('nb-task').value;
+    var note = document.getElementById('nb-note').value.trim();
+    if(!name && task !== 'other'){ toast('Pick a character, or choose Other for a general task.'); el.focus(); return; }
+    if(!name && !note){ toast('Add a note so you know what this task is.'); document.getElementById('nb-note').focus(); return; }
+    if(name && state.builds.some(function(b){ return !b.done && lc(b.name) === lc(name) && b.task === task && !note; })){
+      toast(name + ' already has a ' + TASK_NAME[task] + ' task.'); return;
+    }
+    remember(name);
+    state.builds.push({id:uid(), name:name, task:task, note:note, done:false});
+    focusSel = '#nb-name';
     commit();
   }
 
@@ -464,52 +800,54 @@ dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
       state.teams.push({id:uid(), name:'', tier:+b.dataset.tier, slots:[[],[],[]]});
       commit();
     } else if(a === 'del-team'){
-      snapshot(); state.teams = state.teams.filter(function(t){ return t.id !== b.dataset.id; });
-      commit(); toast('Team deleted.', true);
+      withUndo('Team deleted.', function(){ state.teams = state.teams.filter(function(t){ return t.id !== b.dataset.id; }); });
     } else if(a === 'promote'){
-      team = state.teams.filter(function(t){ return t.id === b.dataset.team; })[0];
+      team = find(state.teams, b.dataset.team);
       if(!team) return;
-      var slot = team.slots[+b.dataset.slot], i = slot.indexOf(b.dataset.char);
-      if(i > 0){ slot.splice(i,1); slot.unshift(b.dataset.char); commit(); }
+      var slot = team.slots[+b.dataset.slot], i = slot.indexOf(b.dataset.name);
+      if(i > 0){ slot.splice(i,1); slot.unshift(b.dataset.name); commit(); }
     } else if(a === 'rm-slot'){
-      team = state.teams.filter(function(t){ return t.id === b.dataset.team; })[0];
+      team = find(state.teams, b.dataset.team);
       if(!team) return;
-      team.slots[+b.dataset.slot] = team.slots[+b.dataset.slot].filter(function(id){ return id !== b.dataset.char; });
+      team.slots[+b.dataset.slot] = team.slots[+b.dataset.slot].filter(function(n){ return n !== b.dataset.name; });
       commit();
-    } else if(a === 'slot-add'){
-      var input = b.parentNode.querySelector('input');
-      addToSlot(b.dataset.team, +b.dataset.slot, input.value);
-    } else if(a === 'add-char'){ addChar();
-    } else if(a === 'del-char'){
-      snapshot();
-      state.chars = state.chars.filter(function(c){ return c.id !== b.dataset.id; });
-      state.teams.forEach(function(t){ t.slots = t.slots.map(function(s){ return s.filter(function(id){ return id !== b.dataset.id; }); }); });
-      commit(); toast('Character deleted and removed from teams.', true);
-    } else if(a === 'add-task'){ addTask();
-    } else if(a === 'del-task'){
-      snapshot(); state.tasks = state.tasks.filter(function(t){ return t.id !== b.dataset.id; });
-      commit(); toast('Task deleted.', true);
+    } else if(a === 'add-pull'){ addPull();
+    } else if(a === 'del-pull'){
+      var dp = find(state.pulls, b.dataset.id);
+      withUndo((dp ? dp.name : 'Character') + ' removed from Pull.', function(){ state.pulls = state.pulls.filter(function(p){ return p.id !== b.dataset.id; }); });
+    } else if(a === 'pulled'){
+      var p = find(state.pulls, b.dataset.id);
+      if(!p) return;
+      withUndo(p.name + ' pulled. Added a Level task on Build.', function(){
+        state.pulls = state.pulls.filter(function(x){ return x.id !== p.id; });
+        if(!state.builds.some(function(x){ return !x.done && lc(x.name) === lc(p.name); }))
+          state.builds.push({id:uid(), name:p.name, task:'level', note:p.note || '', done:false});
+      });
+    } else if(a === 'add-build'){ addBuild();
+    } else if(a === 'del-build'){
+      withUndo('Task deleted.', function(){ state.builds = state.builds.filter(function(x){ return x.id !== b.dataset.id; }); });
+    } else if(a === 'clear-done'){
+      withUndo('Finished tasks cleared.', function(){ state.builds = state.builds.filter(function(x){ return !x.done; }); });
     }
-  });
-
-  app.addEventListener('keydown', function(e){
-    if(e.key !== 'Enter') return;
-    var el = e.target, k = el.dataset && el.dataset.enter;
-    if(!k) return;
-    e.preventDefault();
-    if(k === 'slot-add') addToSlot(el.dataset.team, +el.dataset.slot, el.value);
-    else if(k === 'add-char') addChar();
-    else if(k === 'add-task') addTask();
   });
 
   app.addEventListener('change', function(e){
     var el = e.target, kind = el.dataset && el.dataset.kind;
     if(!kind) return;
-    var coll = kind === 'team' ? state.teams : kind === 'char' ? state.chars : state.tasks;
-    var item = coll.filter(function(x){ return x.id === el.dataset.id; })[0];
+    var coll = kind === 'team' ? state.teams : kind === 'pull' ? state.pulls : state.builds;
+    var item = find(coll, el.dataset.id);
     if(!item) return;
     var f = el.dataset.field;
-    item[f] = el.type === 'checkbox' ? el.checked : (f === 'tier' ? +el.value : el.value);
+    if(kind === 'build' && f === 'done'){
+      item.done = el.checked;
+      commit();
+      if(item.done){
+        var label = (item.name || 'General') + ' ' + TASK_NAME[item.task].toLowerCase();
+        toast('Finished: ' + label + '.', function(){ item = find(state.builds, item.id); if(item){ item.done = false; commit(); } });
+      }
+      return;
+    }
+    item[f] = f === 'tier' ? +el.value : (f === 'note' ? el.value.trim() : el.value);
     commit();
   });
 
@@ -522,7 +860,7 @@ dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
       document.getElementById('backup-text').value = JSON.stringify(state, null, 1);
       if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
     } else if(b.dataset.act === 'reset'){
-      snapshot(); state = seed(); commit(); toast('Reset to your starting notes.', true);
+      withUndo('Reset to your starting notes.', function(){ state = seed(); });
     } else if(b.dataset.dlg === 'close'){
       if(dlg.close) dlg.close(); else dlg.removeAttribute('open');
     } else if(b.dataset.dlg === 'copy'){
@@ -530,18 +868,19 @@ dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
       ta.select();
       var ok = false;
       try{ ok = document.execCommand('copy'); }catch(err){}
-      if(!ok && navigator.clipboard){ navigator.clipboard.writeText(ta.value).then(function(){ toast('Copied.', false); }, function(){ toast('Select the text and copy it manually.', false); }); }
-      else toast(ok ? 'Copied.' : 'Select the text and copy it manually.', false);
+      if(!ok && navigator.clipboard){ navigator.clipboard.writeText(ta.value).then(function(){ toast('Copied.'); }, function(){ toast('Select the text and copy it manually.'); }); }
+      else toast(ok ? 'Copied.' : 'Select the text and copy it manually.');
     } else if(b.dataset.dlg === 'load'){
       try{
-        var s = JSON.parse(document.getElementById('backup-text').value);
-        if(!valid(s)) throw new Error('bad');
-        snapshot(); state = s; commit();
+        var s = normalize(JSON.parse(document.getElementById('backup-text').value));
+        if(!s) throw new Error('bad');
         if(dlg.close) dlg.close(); else dlg.removeAttribute('open');
-        toast('Data loaded.', true);
-      }catch(err){ toast('That text isn’t valid planner data. Paste the full copy and try again.', false); }
+        withUndo('Data loaded.', function(){ state = s; });
+      }catch(err){ toast('That text isn’t valid planner data. Paste the full copy and try again.'); }
     } else if(b.dataset.toast === 'undo'){
-      if(undoSnap){ state = JSON.parse(undoSnap); undoSnap = null; commit(); document.getElementById('toast').classList.remove('show'); }
+      var fn = undoFn; undoFn = null;
+      document.getElementById('toast').classList.remove('show');
+      if(fn) fn();
     }
   });
 

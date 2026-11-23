@@ -2,7 +2,7 @@
 
 Plan teams, see who to pull, and keep track of who still needs building.
 
-[Teams](#teams) [Pull & build](#roster) [To-do](#todo)
+[Teams](#teams) [Build](#build) [Pull](#pull)
 
 Your changes save in this browser automatically.
 
