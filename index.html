@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wuthering Waves planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E7EDF1; --surface:#F6F9FB; --surface-2:#EBF1F5; --ink:#162536; --muted:#566879; --line:#C3D0DA;
+  --accent:#16697A; --accent-ink:#FFFFFF;
+  --pull:#A83A63; --build:#8F5A0E; --done:#23704F;
+  --pull-bg:#F6E2EA; --build-bg:#F7E9D2; --done-bg:#DDF0E6;
+  --gold:#8A6212; --gold-bg:#F4E8C8;
+  --font-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --font-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1923; --surface:#162531; --surface-2:#1C2E3C; --ink:#E5EEF4; --muted:#9AAEBD; --line:#2C4152;
+    --accent:#5CC3D4; --accent-ink:#06222A;
+    --pull:#F08AAE; --build:#EDB05C; --done:#6FD0A0;
+    --pull-bg:#3A1F2B; --build-bg:#3A2E17; --done-bg:#16372A;
+    --gold:#E6BC63; --gold-bg:#3A3118;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1923; --surface:#162531; --surface-2:#1C2E3C; --ink:#E5EEF4; --muted:#9AAEBD; --line:#2C4152;
+  --accent:#5CC3D4; --accent-ink:#06222A;
+  --pull:#F08AAE; --build:#EDB05C; --done:#6FD0A0;
+  --pull-bg:#3A1F2B; --build-bg:#3A2E17; --done-bg:#16372A;
+  --gold:#E6BC63; --gold-bg:#3A3118;
+  color-scheme:dark;
+}
+
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.45; min-height:100vh; }
+button,input,select,textarea{ font:inherit; color:inherit; }
+button{ cursor:pointer; }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+.wrap{ max-width:1180px; margin:0 auto; padding:24px 20px 80px; }
+header.top{ display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px 24px; padding-bottom:6px; }
+h1{ font-family:var(--font-display); font-weight:700; font-size:clamp(1.9rem,4vw,2.7rem); line-height:1.05; margin:0; letter-spacing:-0.015em; }
+.lede{ margin:6px 0 0; color:var(--muted); max-width:60ch; }
+nav.tabs{ display:flex; gap:4px; border-bottom:2px solid var(--line); margin:18px 0 22px; overflow-x:auto; }
+nav.tabs a{ padding:10px 16px; text-decoration:none; color:var(--muted); font-weight:600; border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap; }
+nav.tabs a[aria-current="page"]{ color:var(--ink); border-bottom-color:var(--accent); }
+nav.tabs a:hover{ color:var(--ink); }
+
+h2{ font-family:var(--font-display); font-weight:700; font-size:1.3rem; margin:0; letter-spacing:-0.01em; }
+.hint{ color:var(--muted); font-size:0.92rem; margin:0 0 18px; max-width:70ch; }
+.empty{ color:var(--muted); border:1px dashed var(--line); border-radius:10px; padding:16px; margin:0; }
+
+.btn{ background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:7px 13px; font-weight:600; }
+.btn:hover{ border-color:var(--accent); }
+.btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.btn.quiet{ background:transparent; border-color:transparent; color:var(--muted); text-decoration:underline; padding-left:6px; padding-right:6px; }
+.x{ background:transparent; border:0; color:var(--muted); font-size:1.2rem; line-height:1; padding:2px 7px; border-radius:6px; }
+.x:hover{ color:var(--pull); background:var(--pull-bg); }
+
+input[type="text"],input:not([type]),select{ background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:7px 10px; min-width:0; }
+input::placeholder{ color:var(--muted); opacity:.85; }
+
+/* tier sections */
+.tier-block{ margin-bottom:34px; }
+.tier-head{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin-bottom:12px; }
+.badge{ display:inline-block; font-size:0.8rem; font-weight:600; padding:2px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); background:var(--surface); }
+.badge.t1{ color:var(--gold); background:var(--gold-bg); border-color:var(--gold); }
+.tier-head .grow{ flex:1; }
+
+/* teams */
+.team-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr)); gap:16px; }
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:12px; }
+.team{ padding:14px; display:flex; flex-direction:column; gap:12px; }
+.team-top{ display:flex; gap:8px; align-items:center; }
+.team-top .name{ flex:1; font-weight:600; border-color:transparent; background:transparent; padding-left:4px; }
+.team-top .name:hover,.team-top .name:focus{ border-color:var(--line); background:var(--surface-2); }
+.slots{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.slot{ background:var(--surface-2); border-radius:6px; border-top:4px solid var(--line); padding:10px 8px 8px; display:flex; flex-direction:column; gap:8px; min-height:112px; }
+.slot.s-pull{ border-top-color:var(--pull); }
+.slot.s-build{ border-top-color:var(--build); }
+.slot.s-done{ border-top-color:var(--done); }
+.chips{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:5px; }
+.chip{ display:inline-flex; align-items:center; border-radius:999px; background:var(--surface); border:1px solid var(--line); max-width:100%; }
+.chip.main{ flex-basis:100%; border-radius:8px; border-width:1.5px; }
+.chip.main .chip-name{ font-weight:600; font-size:1rem; }
+.chip:not(.main) .chip-name{ font-size:0.86rem; color:var(--muted); }
+.chip-name{ background:none; border:0; padding:4px 4px 4px 8px; text-align:left; overflow-wrap:anywhere; }
+.chip:not(.main) .chip-name:hover{ color:var(--ink); text-decoration:underline; }
+.chip .glyph{ margin-right:5px; }
+.chip.st-pull .glyph{ color:var(--pull); } .chip.st-build .glyph{ color:var(--build); } .chip.st-done .glyph{ color:var(--done); }
+.chip-x{ background:none; border:0; color:var(--muted); padding:2px 7px 2px 3px; font-size:1rem; line-height:1; }
+.chip-x:hover{ color:var(--pull); }
+.slot-add{ display:flex; gap:4px; margin-top:auto; }
+.slot-add input{ flex:1; min-width:0; font-size:0.86rem; padding:5px 8px; }
+.slot-add button{ border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:0 9px; font-weight:600; }
+.slot-add button:hover{ border-color:var(--accent); }
+.verdict{ font-size:0.9rem; margin:0; padding:7px 10px; border-radius:8px; }
+.verdict.ready{ background:var(--done-bg); color:var(--done); font-weight:600; }
+.verdict.wait{ background:var(--surface-2); color:var(--muted); }
+.verdict b{ color:var(--ink); font-weight:600; }
+
+/* roster */
+.addbar{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
+.addbar input{ flex:1 1 200px; }
+.cols{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; align-items:start; }
+.col{ background:var(--surface-2); border-radius:12px; padding:14px; border-top:5px solid var(--line); }
+.col.st-pull{ border-top-color:var(--pull); } .col.st-build{ border-top-color:var(--build); } .col.st-done{ border-top-color:var(--done); }
+.col-head{ display:flex; align-items:baseline; gap:8px; margin-bottom:12px; }
+.col-head .glyph{ font-size:1.1rem; }
+.col.st-pull .glyph{ color:var(--pull); } .col.st-build .glyph{ color:var(--build); } .col.st-done .glyph{ color:var(--done); }
+.count{ margin-left:auto; font-weight:600; color:var(--muted); }
+.tier-label{ margin:14px 0 8px; display:flex; gap:8px; align-items:center; }
+.tier-label:first-of-type{ margin-top:0; }
+.char{ padding:10px 12px; margin-bottom:8px; display:flex; flex-direction:column; gap:8px; }
+.char-top{ display:flex; align-items:center; gap:8px; }
+.char-name{ font-size:1.05rem; }
+.uses{ font-size:0.82rem; color:var(--muted); margin-right:auto; }
+.char-ctl{ display:flex; gap:6px; }
+.char-ctl select{ flex:1; font-size:0.88rem; padding:5px 8px; }
+.note{ width:100%; font-size:0.9rem; padding:5px 8px; border-color:transparent; background:transparent; }
+.note:hover,.note:focus{ border-color:var(--line); background:var(--surface-2); }
+.col-empty{ color:var(--muted); font-size:0.92rem; margin:0; }
+
+/* todo */
+.todo-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.todo{ display:flex; align-items:center; gap:10px; padding:10px 12px; flex-wrap:wrap; }
+.todo input[type="checkbox"]{ width:20px; height:20px; accent-color:var(--accent); flex:none; }
+.todo .t-text{ font-weight:600; min-width:120px; }
+.todo.done .t-text{ text-decoration:line-through; color:var(--muted); }
+.todo .note{ flex:1 1 180px; width:auto; }
+.todo select{ font-size:0.88rem; padding:5px 8px; }
+
+footer.tools{ margin-top:40px; padding-top:16px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:var(--muted); font-size:0.9rem; }
+footer.tools span{ flex:1 1 280px; }
+
+dialog{ background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:14px; width:min(560px,92vw); padding:20px; }
+dialog::backdrop{ background:rgba(8,16,24,.55); }
+dialog h2{ margin-bottom:6px; }
+dialog p{ margin:0 0 12px; color:var(--muted); font-size:0.94rem; }
+dialog textarea{ width:100%; min-height:200px; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:10px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:0.8rem; resize:vertical; }
+dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+
+#toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(18px + env(safe-area-inset-bottom,0px)); background:var(--ink); color:var(--bg); padding:10px 14px; border-radius:10px; display:none; align-items:center; gap:12px; max-width:92vw; z-index:50; box-shadow:0 6px 24px rgba(0,0,0,.25); }
+#toast.show{ display:flex; }
+#toast button{ background:transparent; border:1px solid currentColor; color:inherit; border-radius:6px; padding:3px 10px; font-weight:600; }
+
+@media (max-width:900px){ .cols{ grid-template-columns:1fr; } }
+@media (max-width:520px){
+  .wrap{ padding:18px 14px 80px; }
+  .slots{ grid-template-columns:1fr; }
+  .slot{ min-height:0; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Wuthering Waves planner</h1>
+      <p class="lede">Plan teams, see who to pull, and keep track of who still needs building.</p>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <a href="#teams" data-tab="teams">Teams</a>
+    <a href="#roster" data-tab="roster">Pull &amp; build</a>
+    <a href="#todo" data-tab="todo">To-do</a>
+  </nav>
+
+  <main id="app"></main>
+
+  <footer class="tools">
+    <span>Your changes save in this browser automatically.</span>
+    <button class="btn" data-act="backup">Back up or restore</button>
+    <button class="btn quiet" data-act="reset">Reset to my starting notes</button>
+  </footer>
+</div>
+
+<datalist id="roster-names"></datalist>
+
+<dialog id="backup">
+  <h2>Back up or restore</h2>
+  <p>Copy this text and keep it somewhere safe. To restore it, or move to another device, paste a saved copy here and choose Load this data.</p>
+  <textarea id="backup-text" aria-label="Planner data"></textarea>
+  <div class="row">
+    <button class="btn primary" data-dlg="copy">Copy</button>
+    <button class="btn" data-dlg="load">Load this data</button>
+    <button class="btn quiet" data-dlg="close">Close</button>
+  </div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"><span id="toast-msg"></span><button id="toast-undo" data-toast="undo" hidden>Undo</button></div>
+
+<script>
+(function(){
+  var KEY = 'wuwa-planner-v1';
+  var TIERS = [1,2,3];
+  var TIER_NAME = {1:'Tier 1',2:'Tier 2',3:'Tier 3'};
+  var TIER_HINT = {1:'Top priority',2:'Next up',3:'Someday'};
+  var STATUS = {
+    pull:{label:'Need to pull', short:'pull', glyph:'\u25CB'},
+    build:{label:'Need to build', short:'build', glyph:'\u25D0'},
+    done:{label:'Ready', short:'ready', glyph:'\u25CF'}
+  };
+  var RANK = {done:0, build:1, pull:2};
+
+  function uid(){ return 'x' + Math.random().toString(36).slice(2,10); }
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+  function seed(){
+    var chars = [], ids = {};
+    function add(name,status,tier,note){ var c = {id:uid(), name:name, status:status, tier:tier, note:note||''}; chars.push(c); ids[name] = c.id; }
+    add('Shorekeeper','pull',1);
+    add('Hsin','pull',1);
+    add('Suoming','pull',1);
+    add('Denia','pull',2);
+    add('Lupa','pull',2);
+    add('Chisa','pull',2);
+    add('Lily','pull',2);
+    add('Hiyuki','build',1);
+    add('Lucilla','build',1);
+    add('Suisui','build',1);
+    add('Sigrika','build',1);
+    add('Qiuyuan','build',1);
+    add('Buling','build',2);
+    add('Verina','build',2);
+    ['Aemeath','Qingxiao','Mornye','Phrolova','Cantarella','ARover'].forEach(function(n){ add(n,'done',2); });
+    function team(tier,slots){ return {id:uid(), name:'', tier:tier, slots:slots.map(function(s){ return s.map(function(n){ return ids[n]; }); })}; }
+    var teams = [
+      team(1,[['Hiyuki'],['Lucilla'],['Suisui']]),
+      team(1,[['Sigrika'],['Qiuyuan'],['Shorekeeper','Verina','ARover']]),
+      team(1,[['Phrolova'],['Qiuyuan'],['Buling','Cantarella','Shorekeeper','Verina','Sigrika']]),
+      team(1,[['Hsin'],['Suoming'],['Shorekeeper','Lily']]),
+      team(2,[['Aemeath'],['Denia'],['Lupa','Chisa']]),
+      team(2,[['Qingxiao'],['Denia'],['Mornye']])
+    ];
+    var tasks = [
+      {id:uid(), text:'Variation \u00D73', note:'Suisui > Buling > Verina', tier:1, done:false},
+      {id:uid(), text:'Cosmic Ripples', note:'', tier:1, done:false}
+    ];
+    return {v:1, chars:chars, teams:teams, tasks:tasks};
+  }
+
+  function valid(s){ return s && Array.isArray(s.chars) && Array.isArray(s.teams) && Array.isArray(s.tasks); }
+  function load(){
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(raw){ var s = JSON.parse(raw); if(valid(s)) return s; }
+    }catch(e){}
+    return seed();
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+  var state = load();
+  var byId = {};
+  var undoSnap = null, toastTimer = null, focusSel = null;
+  var tab = 'teams';
+
+  function readHash(){
+    var h = (location.hash || '').replace('#','');
+    tab = (h === 'roster' || h === 'todo' || h === 'teams') ? h : 'teams';
+  }
+
+  /* ---------- helpers ---------- */
+  function tierOptions(cur){ return TIERS.map(function(t){ return '<option value="'+t+'"'+(t===cur?' selected':'')+'>'+TIER_NAME[t]+'</option>'; }).join(''); }
+  function statusOptions(cur){ return ['pull','build','done'].map(function(s){ return '<option value="'+s+'"'+(s===cur?' selected':'')+'>'+STATUS[s].label+'</option>'; }).join(''); }
+  function badge(t){ return '<span class="badge'+(t===1?' t1':'')+'">'+TIER_NAME[t]+'</span>'; }
+  function teamCount(id){ return state.teams.filter(function(t){ return t.slots.some(function(s){ return s.indexOf(id) !== -1; }); }).length; }
+  function findByName(name){ var n = name.trim().toLowerCase(); return state.chars.filter(function(c){ return c.name.toLowerCase() === n; })[0]; }
+
+  /* ---------- teams ---------- */
+  function slotInfo(slot){
+    var opts = slot.map(function(id){ return byId[id]; }).filter(Boolean);
+    var best = opts.slice().sort(function(a,b){ return RANK[a.status] - RANK[b.status]; })[0];
+    return {opts:opts, best:best, status: best ? best.status : 'empty'};
+  }
+
+  function teamHTML(t){
+    var infos = t.slots.map(slotInfo);
+    var waiting = [];
+    infos.forEach(function(info,i){
+      if(info.status === 'empty'){ waiting.push('slot '+(i+1)+' is empty'); }
+      else if(info.status !== 'done'){ waiting.push('<b>'+esc(info.best.name)+'</b> ('+STATUS[info.status].short+')'); }
+    });
+    var verdict = waiting.length
+      ? '<p class="verdict wait">Waiting on '+waiting.join(', ')+'</p>'
+      : '<p class="verdict ready">Ready to play</p>';
+
+    var slotsHTML = t.slots.map(function(slot,si){
+      var info = infos[si];
+      var chips = info.opts.map(function(c,i){
+        return '<li class="chip st-'+c.status+(i===0?' main':'')+'">'
+          + '<button class="chip-name" data-act="promote" data-team="'+t.id+'" data-slot="'+si+'" data-char="'+c.id+'"'+(i? ' title="Make main pick"' : '')+'>'
+          + '<span class="glyph" aria-hidden="true">'+STATUS[c.status].glyph+'</span>'+esc(c.name)+'<span class="sr"> ('+STATUS[c.status].label+')</span></button>'
+          + '<button class="chip-x" data-act="rm-slot" data-team="'+t.id+'" data-slot="'+si+'" data-char="'+c.id+'" aria-label="Remove '+esc(c.name)+' from this slot">\u00D7</button></li>';
+      }).join('');
+      return '<div class="slot s-'+info.status+'">'
+        + '<ul class="chips">'+chips+'</ul>'
+        + '<div class="slot-add"><input type="text" list="roster-names" placeholder="Add character" aria-label="Add character to slot '+(si+1)+'" data-enter="slot-add" data-team="'+t.id+'" data-slot="'+si+'">'
+        + '<button data-act="slot-add" data-team="'+t.id+'" data-slot="'+si+'" aria-label="Add to slot '+(si+1)+'">+</button></div></div>';
+    }).join('');
+
+    return '<article class="card team">'
+      + '<div class="team-top"><input class="name" data-kind="team" data-id="'+t.id+'" data-field="name" value="'+esc(t.name)+'" placeholder="Name this team" aria-label="Team name">'
+      + '<select data-kind="team" data-id="'+t.id+'" data-field="tier" aria-label="Team tier">'+tierOptions(t.tier)+'</select>'
+      + '<button class="x" data-act="del-team" data-id="'+t.id+'" aria-label="Delete team">\u00D7</button></div>'
+      + '<div class="slots">'+slotsHTML+'</div>'
+      + verdict
+      + '</article>';
+  }
+
+  function teamsView(){
+    var html = '<p class="hint">Each column is one slot. The first name is the main pick, and the smaller names are swap-ins. Click a swap-in to make it the main pick. ○ means you need to pull, ◐ means you need to build, ● means ready.</p>';
+    TIERS.forEach(function(tier){
+      var teams = state.teams.filter(function(t){ return t.tier === tier; });
+      if(!teams.length && tier === 3) return;
+      html += '<section class="tier-block"><div class="tier-head">'+badge(tier)+'<h2>'+TIER_HINT[tier]+' teams</h2><span class="grow"></span>'
+        + '<button class="btn" data-act="add-team" data-tier="'+tier+'">Add a '+TIER_NAME[tier]+' team</button></div>'
+        + (teams.length ? '<div class="team-grid">'+teams.map(teamHTML).join('')+'</div>' : '<p class="empty">No '+TIER_NAME[tier]+' teams yet. Add one to start planning.</p>')
+        + '</section>';
+    });
+    return html;
+  }
+
+  /* ---------- roster ---------- */
+  function charHTML(c){
+    var n = teamCount(c.id);
+    return '<article class="card char">'
+      + '<div class="char-top"><strong class="char-name">'+esc(c.name)+'</strong>'
+      + '<span class="uses">'+(n ? 'In '+n+(n===1?' team':' teams') : 'Not in a team')+'</span>'
+      + '<button class="x" data-act="del-char" data-id="'+c.id+'" aria-label="Delete '+esc(c.name)+'">\u00D7</button></div>'
+      + '<div class="char-ctl"><select data-kind="char" data-id="'+c.id+'" data-field="status" aria-label="Status of '+esc(c.name)+'">'+statusOptions(c.status)+'</select>'
+      + '<select data-kind="char" data-id="'+c.id+'" data-field="tier" aria-label="Tier of '+esc(c.name)+'">'+tierOptions(c.tier)+'</select></div>'
+      + '<input class="note" data-kind="char" data-id="'+c.id+'" data-field="note" value="'+esc(c.note)+'" placeholder="Add a note" aria-label="Note for '+esc(c.name)+'">'
+      + '</article>';
+  }
+
+  function rosterView(){
+    var html = '<p class="hint">Pull means you don’t own them yet. Build means you own them but they still need levels and gear. Change a character’s status and they move to the next column.</p>';
+    html += '<div class="addbar"><input type="text" id="nc-name" data-enter="add-char" placeholder="Character name" aria-label="Character name">'
+      + '<select id="nc-status" aria-label="Status">'+statusOptions('pull')+'</select>'
+      + '<select id="nc-tier" aria-label="Tier">'+tierOptions(1)+'</select>'
+      + '<button class="btn primary" data-act="add-char">Add character</button></div>';
+    html += '<div class="cols">';
+    ['pull','build','done'].forEach(function(st){
+      var list = state.chars.filter(function(c){ return c.status === st; });
+      html += '<section class="col st-'+st+'"><div class="col-head"><span class="glyph" aria-hidden="true">'+STATUS[st].glyph+'</span><h2>'+STATUS[st].label+'</h2><span class="count">'+list.length+'</span></div>';
+      if(!list.length){ html += '<p class="col-empty">Nobody here right now.</p>'; }
+      TIERS.forEach(function(tier){
+        var items = list.filter(function(c){ return c.tier === tier; });
+        if(!items.length) return;
+        html += '<div class="tier-label">'+badge(tier)+'</div>' + items.map(charHTML).join('');
+      });
+      html += '</section>';
+    });
+    return html + '</div>';
+  }
+
+  /* ---------- to-do ---------- */
+  function taskHTML(t){
+    return '<li class="card todo'+(t.done?' done':'')+'">'
+      + '<input type="checkbox" data-kind="task" data-id="'+t.id+'" data-field="done"'+(t.done?' checked':'')+' aria-label="Mark '+esc(t.text)+' as done">'
+      + '<span class="t-text">'+esc(t.text)+'</span>'
+      + '<input class="note" data-kind="task" data-id="'+t.id+'" data-field="note" value="'+esc(t.note)+'" placeholder="Add a note" aria-label="Note for '+esc(t.text)+'">'
+      + '<select data-kind="task" data-id="'+t.id+'" data-field="tier" aria-label="Tier of '+esc(t.text)+'">'+tierOptions(t.tier)+'</select>'
+      + '<button class="x" data-act="del-task" data-id="'+t.id+'" aria-label="Delete '+esc(t.text)+'">\u00D7</button></li>';
+  }
+
+  function todoView(){
+    var html = '<p class="hint">Things like leveling skills, farming, or anything else that isn’t a pull or a build.</p>';
+    html += '<div class="addbar"><input type="text" id="nt-text" data-enter="add-task" placeholder="New task, like “Level Echo skills”" aria-label="New task">'
+      + '<select id="nt-tier" aria-label="Tier">'+tierOptions(1)+'</select>'
+      + '<button class="btn primary" data-act="add-task">Add task</button></div>';
+    var any = false;
+    TIERS.forEach(function(tier){
+      var items = state.tasks.filter(function(t){ return t.tier === tier; })
+        .sort(function(a,b){ return (a.done?1:0) - (b.done?1:0); });
+      if(!items.length) return;
+      any = true;
+      html += '<section class="tier-block"><div class="tier-head">'+badge(tier)+'<h2>'+TIER_HINT[tier]+'</h2></div><ul class="todo-list">'+items.map(taskHTML).join('')+'</ul></section>';
+    });
+    if(!any) html += '<p class="empty">Nothing on the list. Add a task above.</p>';
+    return html;
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    byId = {};
+    state.chars.forEach(function(c){ byId[c.id] = c; });
+    document.getElementById('roster-names').innerHTML = state.chars.map(function(c){ return '<option value="'+esc(c.name)+'"></option>'; }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('nav.tabs a'), function(a){
+      if(a.dataset.tab === tab) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    });
+    var app = document.getElementById('app');
+    app.innerHTML = tab === 'roster' ? rosterView() : tab === 'todo' ? todoView() : teamsView();
+    if(focusSel){ var el = app.querySelector(focusSel); if(el) el.focus(); focusSel = null; }
+  }
+  function commit(){ save(); render(); }
+
+  /* ---------- toast / undo ---------- */
+  function toast(msg, canUndo){
+    var t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    document.getElementById('toast-undo').hidden = !canUndo;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, canUndo ? 7000 : 3500);
+  }
+  function snapshot(){ undoSnap = JSON.stringify(state); }
+
+  /* ---------- actions ---------- */
+  function addToSlot(teamId, slotIdx, value){
+    var name = (value || '').trim();
+    if(!name) return;
+    var t = state.teams.filter(function(x){ return x.id === teamId; })[0];
+    if(!t) return;
+    var c = findByName(name);
+    if(!c){
+      c = {id:uid(), name:name, status:'pull', tier:2, note:''};
+      state.chars.push(c);
+      toast(name+' is new, so it was added to your pull list.', false);
+    }
+    var slot = t.slots[slotIdx];
+    if(slot.indexOf(c.id) === -1) slot.push(c.id);
+    focusSel = 'input[data-team="'+teamId+'"][data-slot="'+slotIdx+'"]';
+    commit();
+  }
+
+  function addChar(){
+    var nameEl = document.getElementById('nc-name');
+    var name = nameEl.value.trim();
+    if(!name){ toast('Type a character name first.', false); nameEl.focus(); return; }
+    if(findByName(name)){ toast(name+' is already on your roster.', false); return; }
+    state.chars.push({id:uid(), name:name, status:document.getElementById('nc-status').value, tier:+document.getElementById('nc-tier').value, note:''});
+    focusSel = '#nc-name';
+    commit();
+  }
+
+  function addTask(){
+    var el = document.getElementById('nt-text');
+    var text = el.value.trim();
+    if(!text){ toast('Type a task first.', false); el.focus(); return; }
+    state.tasks.push({id:uid(), text:text, note:'', tier:+document.getElementById('nt-tier').value, done:false});
+    focusSel = '#nt-text';
+    commit();
+  }
+
+  var app = document.getElementById('app');
+
+  app.addEventListener('click', function(e){
+    var b = e.target.closest('[data-act]');
+    if(!b) return;
+    var a = b.dataset.act, team;
+    if(a === 'add-team'){
+      state.teams.push({id:uid(), name:'', tier:+b.dataset.tier, slots:[[],[],[]]});
+      commit();
+    } else if(a === 'del-team'){
+      snapshot(); state.teams = state.teams.filter(function(t){ return t.id !== b.dataset.id; });
+      commit(); toast('Team deleted.', true);
+    } else if(a === 'promote'){
+      team = state.teams.filter(function(t){ return t.id === b.dataset.team; })[0];
+      if(!team) return;
+      var slot = team.slots[+b.dataset.slot], i = slot.indexOf(b.dataset.char);
+      if(i > 0){ slot.splice(i,1); slot.unshift(b.dataset.char); commit(); }
+    } else if(a === 'rm-slot'){
+      team = state.teams.filter(function(t){ return t.id === b.dataset.team; })[0];
+      if(!team) return;
+      team.slots[+b.dataset.slot] = team.slots[+b.dataset.slot].filter(function(id){ return id !== b.dataset.char; });
+      commit();
+    } else if(a === 'slot-add'){
+      var input = b.parentNode.querySelector('input');
+      addToSlot(b.dataset.team, +b.dataset.slot, input.value);
+    } else if(a === 'add-char'){ addChar();
+    } else if(a === 'del-char'){
+      snapshot();
+      state.chars = state.chars.filter(function(c){ return c.id !== b.dataset.id; });
+      state.teams.forEach(function(t){ t.slots = t.slots.map(function(s){ return s.filter(function(id){ return id !== b.dataset.id; }); }); });
+      commit(); toast('Character deleted and removed from teams.', true);
+    } else if(a === 'add-task'){ addTask();
+    } else if(a === 'del-task'){
+      snapshot(); state.tasks = state.tasks.filter(function(t){ return t.id !== b.dataset.id; });
+      commit(); toast('Task deleted.', true);
+    }
+  });
+
+  app.addEventListener('keydown', function(e){
+    if(e.key !== 'Enter') return;
+    var el = e.target, k = el.dataset && el.dataset.enter;
+    if(!k) return;
+    e.preventDefault();
+    if(k === 'slot-add') addToSlot(el.dataset.team, +el.dataset.slot, el.value);
+    else if(k === 'add-char') addChar();
+    else if(k === 'add-task') addTask();
+  });
+
+  app.addEventListener('change', function(e){
+    var el = e.target, kind = el.dataset && el.dataset.kind;
+    if(!kind) return;
+    var coll = kind === 'team' ? state.teams : kind === 'char' ? state.chars : state.tasks;
+    var item = coll.filter(function(x){ return x.id === el.dataset.id; })[0];
+    if(!item) return;
+    var f = el.dataset.field;
+    item[f] = el.type === 'checkbox' ? el.checked : (f === 'tier' ? +el.value : el.value);
+    commit();
+  });
+
+  /* footer tools, dialog, toast */
+  var dlg = document.getElementById('backup');
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-act="backup"],[data-act="reset"],[data-dlg],[data-toast]');
+    if(!b) return;
+    if(b.dataset.act === 'backup'){
+      document.getElementById('backup-text').value = JSON.stringify(state, null, 1);
+      if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
+    } else if(b.dataset.act === 'reset'){
+      snapshot(); state = seed(); commit(); toast('Reset to your starting notes.', true);
+    } else if(b.dataset.dlg === 'close'){
+      if(dlg.close) dlg.close(); else dlg.removeAttribute('open');
+    } else if(b.dataset.dlg === 'copy'){
+      var ta = document.getElementById('backup-text');
+      ta.select();
+      var ok = false;
+      try{ ok = document.execCommand('copy'); }catch(err){}
+      if(!ok && navigator.clipboard){ navigator.clipboard.writeText(ta.value).then(function(){ toast('Copied.', false); }, function(){ toast('Select the text and copy it manually.', false); }); }
+      else toast(ok ? 'Copied.' : 'Select the text and copy it manually.', false);
+    } else if(b.dataset.dlg === 'load'){
+      try{
+        var s = JSON.parse(document.getElementById('backup-text').value);
+        if(!valid(s)) throw new Error('bad');
+        snapshot(); state = s; commit();
+        if(dlg.close) dlg.close(); else dlg.removeAttribute('open');
+        toast('Data loaded.', true);
+      }catch(err){ toast('That text isn’t valid planner data. Paste the full copy and try again.', false); }
+    } else if(b.dataset.toast === 'undo'){
+      if(undoSnap){ state = JSON.parse(undoSnap); undoSnap = null; commit(); document.getElementById('toast').classList.remove('show'); }
+    }
+  });
+
+  window.addEventListener('hashchange', function(){ readHash(); render(); });
+  readHash();
+  render();
+})();
+</script>
+</body>
+</html>
