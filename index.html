@@ -179,6 +179,14 @@ select.mini:hover,select.mini:focus{ border-color:var(--line); background:var(--
 .prow2{ display:flex; align-items:flex-start; gap:8px; padding-left:16px; }
 .prow2 .note.has,.prow2 .note:focus{ flex:1; width:auto; }
 .prow2 .uses{ margin:4px 0 0 auto; flex:none; }
+.add-weapon{ flex:none; font-size:0.78rem; line-height:1.3; height:24px; padding:3px 8px; border:1px dashed var(--line); border-radius:6px; background:transparent; color:var(--muted); }
+.add-weapon:hover{ border-color:var(--muted); color:var(--ink); }
+.pweapon{ display:flex; align-items:center; gap:6px; padding:4px 6px 4px 16px; margin-left:0; border-radius:8px; background:var(--surface-2); }
+.pweapon .wi{ width:30px; height:30px; }
+.pweapon select.mini{ flex:1; min-width:0; color:var(--ink); }
+.pweapon .x{ font-size:1rem; }
+.pitem.have .pname{ color:var(--muted); }
+.have-tag{ font-size:0.78rem; font-weight:600; color:var(--done); white-space:nowrap; flex:none; }
 .uses{ font-size:0.78rem; color:var(--muted); margin-right:auto; white-space:nowrap; }
 
 /* build */
@@ -472,7 +480,7 @@ var CHAR_WEAPON = {
   /* ---------- status (derived from the Pull and Build lists) ---------- */
   function statusOf(name){
     var n = lc(name);
-    if(state.pulls.some(function(p){ return lc(p.name) === n; })) return 'pull';
+    if(state.pulls.some(function(p){ return !p.haveChar && lc(p.name) === n; })) return 'pull';
     if(state.builds.some(function(b){ return !b.done && lc(b.name) === n; })) return 'build';
     return 'done';
   }
@@ -624,13 +632,22 @@ var CHAR_WEAPON = {
   /* ---------- pull ---------- */
   function pullHTML(p){
     var n = teamCount(p.name);
-    return '<li class="card pitem" data-id="'+p.id+'">'
+    return '<li class="card pitem'+(p.haveChar ? ' have' : '')+'" data-id="'+p.id+'">'
       + '<div class="prow"><span class="grip" aria-hidden="true">⠇</span>'
       + charIcon(p.name) + '<span class="pname">'+esc(p.name)+'</span><span class="grow"></span>'
       + '<select class="mini" data-kind="pull" data-id="'+p.id+'" data-field="tier" aria-label="Tier of '+esc(p.name)+'" title="Tier">'+tierOptions(p.tier, true)+'</select>'
-      + '<button class="btn small" data-act="pulled" data-id="'+p.id+'" title="Got them. Moves them to Build.">Got it</button>'
+      + (p.haveChar
+          ? '<span class="have-tag">✓ Pulled</span>'
+          : '<button class="btn small" data-act="pulled" data-id="'+p.id+'" title="Got them. Moves them to Build.">Got it</button>')
       + '<button class="x" data-act="del-pull" data-id="'+p.id+'" aria-label="Remove '+esc(p.name)+'">×</button></div>'
+      + (p.wantWeapon
+          ? '<div class="pweapon">' + weaponIcon(p.weapon)
+            + '<select class="mini" data-kind="pull" data-id="'+p.id+'" data-field="weapon" aria-label="Weapon to pull for '+esc(p.name)+'">'+weaponOptions(p.name, p.weapon || '')+'</select>'
+            + '<button class="btn small" data-act="pulled-weapon" data-id="'+p.id+'" title="Got the weapon. Adds a Weapon task on Build.">Got it</button>'
+            + '<button class="x" data-act="rm-pull-weapon" data-id="'+p.id+'" aria-label="Stop planning a weapon for '+esc(p.name)+'">×</button></div>'
+          : '')
       + '<div class="prow2">' + noteHTML('pull', p, p.name)
+      + (p.wantWeapon ? '' : '<button class="add-weapon" data-act="add-pull-weapon" data-id="'+p.id+'">+ weapon</button>')
       + '<span class="uses">'+(n ? 'In '+n+(n===1?' team':' teams') : 'Not in a team')+'</span></div>'
       + '</li>';
   }
@@ -946,9 +963,36 @@ var CHAR_WEAPON = {
       var p = find(state.pulls, b.dataset.id);
       if(!p) return;
       withUndo(p.name + ' pulled. Added a Level task on Build.', function(){
-        state.pulls = state.pulls.filter(function(x){ return x.id !== p.id; });
-        if(!state.builds.some(function(x){ return !x.done && lc(x.name) === lc(p.name); }))
+        // If their weapon is still planned, keep the card for it
+        if(p.wantWeapon) p.haveChar = true;
+        else state.pulls = state.pulls.filter(function(x){ return x.id !== p.id; });
+        if(!state.builds.some(function(x){ return !x.done && lc(x.name) === lc(p.name) && x.task === 'level'; }))
           state.builds.push({id:uid(), name:p.name, task:'level', note:p.note || '', done:false});
+      });
+    } else if(a === 'add-pull-weapon'){
+      var pa = find(state.pulls, b.dataset.id);
+      if(!pa) return;
+      var cw = CHAR_WEAPON[canonical(pa.name)];
+      pa.wantWeapon = true;
+      pa.weapon = (cw && cw[1]) || '';
+      focusSel = 'select[data-field="weapon"][data-id="'+pa.id+'"]';
+      commit();
+    } else if(a === 'rm-pull-weapon'){
+      var pr = find(state.pulls, b.dataset.id);
+      if(!pr) return;
+      withUndo('Weapon removed from ' + pr.name + '.', function(){
+        if(pr.haveChar) state.pulls = state.pulls.filter(function(x){ return x.id !== pr.id; });
+        else { pr.wantWeapon = false; pr.weapon = ''; }
+      });
+    } else if(a === 'pulled-weapon'){
+      var pw = find(state.pulls, b.dataset.id);
+      if(!pw) return;
+      var wname = pw.weapon;
+      withUndo((wname || 'Weapon') + ' pulled. Added a Weapon task on Build.', function(){
+        if(pw.haveChar) state.pulls = state.pulls.filter(function(x){ return x.id !== pw.id; });
+        else { pw.wantWeapon = false; pw.weapon = ''; }
+        if(!state.builds.some(function(x){ return !x.done && lc(x.name) === lc(pw.name) && x.task === 'weapon' && (x.weapon || '') === (wname || ''); }))
+          state.builds.push({id:uid(), name:pw.name, task:'weapon', weapon:wname || '', note:'', done:false});
       });
     } else if(a === 'add-build'){ addBuild();
     } else if(a === 'del-build'){
