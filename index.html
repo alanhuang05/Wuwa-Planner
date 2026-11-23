@@ -226,6 +226,7 @@ dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
 #combo-list .tag.pull{ color:var(--pull); } #combo-list .tag.build{ color:var(--build); }
 #combo-list li.new{ color:var(--accent); font-weight:600; }
 #combo-list li.none{ color:var(--muted); cursor:default; }
+#combo-list li.grp{ padding:6px 8px 2px; font-size:0.72rem; font-weight:700; color:var(--muted); cursor:default; text-transform:uppercase; letter-spacing:0.04em; }
 
 #toast{ position:fixed; right:calc(18px + env(safe-area-inset-right,0px)); bottom:calc(18px + env(safe-area-inset-bottom,0px)); background:var(--ink); color:var(--bg); padding:10px 14px; border-radius:10px; display:none; align-items:center; gap:12px; max-width:min(420px,calc(100vw - 32px)); z-index:70; box-shadow:0 6px 24px rgba(0,0,0,.25); }
 #toast.show{ display:flex; }
@@ -299,6 +300,8 @@ var CHARACTERS = [
   // Havoc
   'Taoqi','Danjin','Camellya','Roccia','Cantarella','Phrolova','Chisa','Yangyang: Xuanling','Rover (Havoc)'
 ];
+// 4★ characters. Everyone else in the list above is 5★ (Rovers included).
+var FOUR_STAR = ['Sanhua','Baizhi','Youhu','Chixia','Mortefi','Yuanwu','Lumi','Buling','Yangyang','Aalto','Taoqi','Danjin'];
 // Other spellings people type. Lowercase key -> name in the list above.
 var ALIASES = {
   'arover':'Rover (Aero)', 'aero rover':'Rover (Aero)',
@@ -493,6 +496,10 @@ var CHAR_WEAPON = {
     state.pulls.forEach(function(p){ add(p.name); });
     state.builds.forEach(function(b){ add(b.name); });
     return out.sort(function(a,b){ return a.localeCompare(b); });
+  }
+  function rarityOf(name){
+    if(!DB_LC[lc(name)]) return 0;
+    return FOUR_STAR.indexOf(DB_LC[lc(name)]) !== -1 ? 4 : 5;
   }
   function remember(name){
     if(name && !DB_LC[lc(name)] && !state.custom.some(function(c){ return lc(c) === lc(name); })) state.custom.push(name);
@@ -796,16 +803,25 @@ var CHAR_WEAPON = {
     var q = combo.input.value.trim();
     var items = matches(q);
     var exact = q && (DB_LC[lc(q)] || ALIASES[lc(q)] || items.some(function(o){ return lc(o.name) === lc(q); }));
+    // Pull dropdown: 5★ first, then 4★, then custom names. Order within a group is unchanged.
+    if(combo.input.dataset.combo === 'pull'){
+      var groups = {5:[], 4:[], 0:[]};
+      items.forEach(function(o){ o.grp = rarityOf(o.name); groups[o.grp].push(o); });
+      items = groups[5].concat(groups[4], groups[0]);
+    }
     if(q && !exact) items.push({name:q, isNew:true});
     combo.items = items;
     combo.idx = q ? 0 : -1;
     paintCombo(q);
   }
   function paintCombo(q){
+    var GRP_LABEL = {5:'5★', 4:'4★', 0:'Other'};
     list.innerHTML = combo.items.length ? combo.items.map(function(o,i){
+      var prev = combo.items[i-1];
+      var head = (o.grp !== undefined && (!prev || prev.grp !== o.grp)) ? '<li class="grp" role="presentation">'+GRP_LABEL[o.grp]+'</li>' : '';
       var st = o.isNew ? '' : statusOf(o.name);
       var tag = (!o.isNew && st !== 'done' && combo.input.dataset.combo !== 'pull') ? '<span class="tag '+st+'">'+STATUS[st].short+'</span>' : '';
-      return '<li role="option" id="co-'+i+'" data-i="'+i+'" class="'+(o.isNew?'new':'')+'" aria-selected="'+(i===combo.idx)+'">'
+      return head + '<li role="option" id="co-'+i+'" data-i="'+i+'" class="'+(o.isNew?'new':'')+'" aria-selected="'+(i===combo.idx)+'">'
         + (o.isNew ? 'Add “'+esc(o.name)+'” as a new character' : charIcon(o.name) + '<span>' + hl(o.name, q) + '</span>') + tag + '</li>';
     }).join('') : '<li class="none">No matches</li>';
     if(combo.idx >= 0) combo.input.setAttribute('aria-activedescendant','co-'+combo.idx); else combo.input.removeAttribute('aria-activedescendant');
