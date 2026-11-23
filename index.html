@@ -13,7 +13,7 @@
   --accent:#16697A; --accent-ink:#FFFFFF;
   --pull:#A83A63; --build:#8F5A0E; --done:#23704F;
   --pull-bg:#F6E2EA; --build-bg:#F7E9D2; --done-bg:#DDF0E6;
-  --gold:#8A6212; --gold-bg:#F4E8C8;
+  --gold:#8A6212; --gold-bg:#F4E8C8; --silver:#56636F; --silver-bg:#E4E9EE; --bronze:#8D4A26; --bronze-bg:#F3E0D3;
   --font-display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
   --font-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
@@ -24,7 +24,7 @@
     --accent:#5CC3D4; --accent-ink:#06222A;
     --pull:#F08AAE; --build:#EDB05C; --done:#6FD0A0;
     --pull-bg:#3A1F2B; --build-bg:#3A2E17; --done-bg:#16372A;
-    --gold:#E6BC63; --gold-bg:#3A3118;
+    --gold:#E6BC63; --gold-bg:#3A3118; --silver:#C4CED8; --silver-bg:#28323D; --bronze:#E3A07A; --bronze-bg:#3B2519;
     color-scheme:dark;
   }
 }
@@ -33,7 +33,7 @@
   --accent:#5CC3D4; --accent-ink:#06222A;
   --pull:#F08AAE; --build:#EDB05C; --done:#6FD0A0;
   --pull-bg:#3A1F2B; --build-bg:#3A2E17; --done-bg:#16372A;
-  --gold:#E6BC63; --gold-bg:#3A3118;
+  --gold:#E6BC63; --gold-bg:#3A3118; --silver:#C4CED8; --silver-bg:#28323D; --bronze:#E3A07A; --bronze-bg:#3B2519;
   color-scheme:dark;
 }
 
@@ -93,6 +93,8 @@ select.mini:hover,select.mini:focus{ border-color:var(--line); background:var(--
 .tier-head{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; margin-bottom:12px; }
 .badge{ display:inline-block; font-size:0.8rem; font-weight:600; padding:2px 10px; border-radius:999px; border:1px solid var(--line); color:var(--muted); background:var(--surface); }
 .badge.t1{ color:var(--gold); background:var(--gold-bg); border-color:var(--gold); }
+.badge.t2{ color:var(--silver); background:var(--silver-bg); border-color:var(--silver); }
+.badge.t3{ color:var(--bronze); background:var(--bronze-bg); border-color:var(--bronze); }
 .tier-head .grow{ flex:1; }
 
 /* legend */
@@ -118,9 +120,9 @@ select.mini:hover,select.mini:focus{ border-color:var(--line); background:var(--
 .slot.s-pull{ border-top-color:var(--pull); }
 .slot.s-build{ border-top-color:var(--build); }
 .slot.s-done{ border-top-color:var(--done); }
-.chips{ list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:5px; min-height:30px; }
+.chips{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; align-items:flex-start; gap:5px; min-height:30px; }
 .chip{ display:inline-flex; align-items:center; border-radius:999px; background:var(--surface); border:1px solid var(--line); max-width:100%; cursor:grab; }
-.chip.main{ flex-basis:100%; border-radius:8px; border-width:1.5px; }
+.chip.main{ align-self:stretch; border-radius:8px; border-width:1.5px; }
 .chip.main .chip-name{ font-weight:600; font-size:1rem; color:var(--ink); }
 .chip:not(.main) .chip-name{ font-size:0.86rem; color:var(--ink); }
 .chip.st-pull{ background:var(--pull-bg); border-color:var(--pull); }
@@ -214,7 +216,7 @@ dialog .row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>Wuthering Waves planner</h1>
+      <h1>Wuthering Waves Planner</h1>
       <p class="lede">Plan teams, see who to pull, and keep track of who still needs building.</p>
     </div>
   </header>
@@ -278,6 +280,60 @@ var ALIASES = {
   'the shorekeeper':'Shorekeeper', 'sk':'Shorekeeper',
   'xuanling':'Yangyang: Xuanling', 'yangyang xuanling':'Yangyang: Xuanling',
   'xiangliyao':'Xiangli Yao', 'xly':'Xiangli Yao', 'luuk':'Luuk Herssen'
+};
+
+/* ============================================================
+   Weapons by type and rarity (3-star and up). Add new weapons here.
+   Last checked: Nov 2026 (version 3.8).
+   ============================================================ */
+var WEAPONS = {
+  Sword:{
+    5:['Emerald of Genesis','Blazing Brilliance','Red Spring','Unflickering Valor',"Bloodpact's Pledge","Defier's Thorn",'Emerald Sentence','Laser Shearer','Everbright Polestar','Frostburn','Azure Oath','Glint of Clouds','Unspoken Rue'],
+    4:['Lumingloss','Overture','Commando of Conviction','Sword#18','Lunar Cutter','Endless Collapse','Somnoire Anchor','Fables of Wisdom','Feather Edge'],
+    3:['Sword of Night','Originite: Type II','Sword of Voyager','Guardian Sword']
+  },
+  Broadblade:{
+    5:['Lustrous Razor','Verdant Summit','Ages of Harvest','Wildfire Mark','Thunderflare Dominion','Kumokiri','Starfield Calibrator','Radiance Cleaver','Thousandfold Deliverance'],
+    4:['Autumntrace','Discord','Broadblade#41','Dauntless Evernight','Helios Cleaver','Waning Redshift','Meditations on Mercy','Aureate Zenith'],
+    3:['Broadblade of Night','Originite: Type I','Broadblade of Voyager','Guardian Broadblade','Beguiling Melody']
+  },
+  Pistols:{
+    5:['Static Mist','The Last Dance','Woodland Aria','Lux & Umbra','Spectrum Blaster','Phasic Homogenizer','Spectral Trigger','Skull Thrasher','Lullaby'],
+    4:['Thunderbolt','Cadenza','Pistols#26','Undying Flame','Novaburst','Relativistic Jet','Romance in Farewell','Solar Flame'],
+    3:['Pistols of Night','Originite: Type III','Pistols of Voyager','Guardian Pistols']
+  },
+  Gauntlets:{
+    5:['Abyss Surges',"Verity's Handle",'Tragicomedy','Blazing Justice',"Moongazer's Sigil",'Pulsation Bracer',"Daybreaker's Spine",'Solsworn Ciphers'],
+    4:['Stonard','Marcato','Gauntlets#21D','Amity Accord','Hollow Mirage','Celestial Spiral','Legend of Drunken Hero','Aether Strike'],
+    3:['Gauntlets of Night','Originite: Type IV','Gauntlets of Voyager','Guardian Gauntlets']
+  },
+  Rectifier:{
+    5:['Cosmic Ripples','Stringmaster','Rime-Draped Sprouts','Stellar Symphony','Luminous Hymn','Whispers of Sirens','Lethean Elegy','Boson Astrolabe','Forged Dwarf Star','Freeze Frame',"Firstlight's Herald",'Blooming Jadehaven'],
+    4:['Augment','Variation','Rectifier#25','Jinzhou Keeper','Comet Flare','Fusion Accretion','Call of the Abyss','Waltz in Masquerade',"Ocean's Gift",'Radiant Dawn'],
+    3:['Rectifier of Night','Originite: Type V','Rectifier of Voyager','Guardian Rectifier']
+  }
+};
+// Each character's weapon type and signature weapon (null if none). Add new characters here too.
+var CHAR_WEAPON = {
+  'Sanhua':['Sword',null], 'Baizhi':['Rectifier',null], 'Lingyang':['Gauntlets',null], 'Zhezhi':['Rectifier','Rime-Draped Sprouts'],
+  'Youhu':['Gauntlets',null], 'Carlotta':['Pistols','The Last Dance'], 'Lucilla':['Rectifier','Freeze Frame'], 'Hiyuki':['Sword','Frostburn'],
+  'Suisui':['Rectifier',"Firstlight's Herald"],
+  'Chixia':['Pistols',null], 'Encore':['Rectifier',null], 'Mortefi':['Pistols',null], 'Changli':['Sword','Blazing Brilliance'],
+  'Brant':['Sword','Unflickering Valor'], 'Lupa':['Broadblade','Wildfire Mark'], 'Galbrena':['Pistols','Lux & Umbra'],
+  'Mornye':['Broadblade','Starfield Calibrator'], 'Aemeath':['Sword','Everbright Polestar'], 'Denia':['Rectifier','Forged Dwarf Star'],
+  'Jingran':['Broadblade','Thousandfold Deliverance'],
+  'Calcharo':['Broadblade',null], 'Yinlin':['Rectifier','Stringmaster'], 'Yuanwu':['Gauntlets',null], 'Xiangli Yao':['Gauntlets',"Verity's Handle"],
+  'Lumi':['Broadblade',null], 'Augusta':['Broadblade','Thunderflare Dominion'], 'Buling':['Rectifier',null], 'Rebecca':['Pistols','Skull Thrasher'],
+  'Hsin':['Rectifier','Blooming Jadehaven'], 'Suoming':['Sword','Unspoken Rue'], 'Rover (Electro)':['Sword',null],
+  'Yangyang':['Sword',null], 'Aalto':['Pistols',null], 'Jiyan':['Broadblade','Verdant Summit'], 'Jianxin':['Gauntlets',null],
+  'Ciaccona':['Pistols','Woodland Aria'], 'Cartethyia':['Sword',"Defier's Thorn"], 'Iuno':['Gauntlets',"Moongazer's Sigil"],
+  'Qiuyuan':['Sword','Emerald Sentence'], 'Sigrika':['Gauntlets','Solsworn Ciphers'], 'Qingxiao':['Sword','Glint of Clouds'], 'Rover (Aero)':['Sword',null],
+  'Verina':['Rectifier',null], 'Jinhsi':['Broadblade','Ages of Harvest'], 'Shorekeeper':['Rectifier','Stellar Symphony'], 'Phoebe':['Rectifier','Luminous Hymn'],
+  'Zani':['Gauntlets','Blazing Justice'], 'Lynae':['Pistols','Spectrum Blaster'], 'Luuk Herssen':['Gauntlets',"Daybreaker's Spine"],
+  'Lucy':['Pistols','Spectral Trigger'], 'Lily':['Pistols','Lullaby'], 'Rover (Spectro)':['Sword',null],
+  'Taoqi':['Broadblade',null], 'Danjin':['Sword',null], 'Camellya':['Sword','Red Spring'], 'Roccia':['Gauntlets','Tragicomedy'],
+  'Cantarella':['Rectifier','Whispers of Sirens'], 'Phrolova':['Rectifier','Lethean Elegy'], 'Chisa':['Broadblade','Kumokiri'],
+  'Yangyang: Xuanling':['Sword','Azure Oath'], 'Rover (Havoc)':['Sword',null]
 };
 
 (function(){
@@ -372,7 +428,7 @@ var ALIASES = {
 
   var state = load();
   var tab = 'teams';
-  var focusSel = null, suppressComboOpen = false;
+  var focusSel = null, suppressComboOpen = false, lastBuildTask = 'level';
 
   function readHash(){
     var h = (location.hash || '').replace('#','');
@@ -405,7 +461,36 @@ var ALIASES = {
   /* ---------- helpers ---------- */
   function tierOptions(cur, short){ return TIERS.map(function(t){ return '<option value="'+t+'"'+(t===cur?' selected':'')+'>'+(short ? 'T'+t : TIER_NAME[t])+'</option>'; }).join(''); }
   function taskOptions(cur){ return TASKS.map(function(t){ return '<option value="'+t[0]+'"'+(t[0]===cur?' selected':'')+'>'+t[1]+'</option>'; }).join(''); }
-  function badge(t){ return '<span class="badge'+(t===1?' t1':'')+'">'+TIER_NAME[t]+'</span>'; }
+  function badge(t){ return '<span class="badge t'+t+'">'+TIER_NAME[t]+'</span>'; }
+  function weaponOptions(name, cur){
+    var cw = CHAR_WEAPON[canonical(name)];
+    var seen = {}, html = '<option value="">Any weapon</option>';
+    function group(label, list){
+      list = list.filter(function(w){ return !seen[w]; });
+      if(!list.length) return;
+      html += '<optgroup label="'+esc(label)+'">' + list.map(function(w){ seen[w] = 1; return '<option value="'+esc(w)+'"'+(w===cur?' selected':'')+'>'+esc(w)+'</option>'; }).join('') + '</optgroup>';
+    }
+    function alpha(list){ return list.slice().sort(function(a,b){ return a.localeCompare(b); }); }
+    if(cw && WEAPONS[cw[0]]){
+      // keep a saved weapon visible even if it isn't this character's type
+      if(cur && cur !== cw[1] && [5,4,3].every(function(r){ return WEAPONS[cw[0]][r].indexOf(cur) === -1; })) group('Current', [cur]);
+      if(cw[1]) group('Signature', [cw[1]]);
+      [5,4,3].forEach(function(r){ group(r+'★ '+cw[0], alpha(WEAPONS[cw[0]][r])); });
+    } else {
+      Object.keys(WEAPONS).forEach(function(t){ [5,4,3].forEach(function(r){ group(t+' '+r+'★', alpha(WEAPONS[t][r])); }); });
+      if(cur && !seen[cur]) group('Current', [cur]);
+    }
+    return html;
+  }
+  function syncWeaponField(){
+    var task = document.getElementById('nb-task'), field = document.getElementById('nb-weapon-field');
+    if(!task || !field) return;
+    field.hidden = task.value !== 'weapon';
+    if(!field.hidden){
+      var sel = document.getElementById('nb-weapon');
+      sel.innerHTML = weaponOptions(document.getElementById('nb-name').value, sel.value);
+    }
+  }
   function teamCount(name){ var n = lc(name); return state.teams.filter(function(t){ return t.slots.some(function(s){ return s.some(function(x){ return lc(x) === n; }); }); }).length; }
   function find(coll, id){ return coll.filter(function(x){ return x.id === id; })[0]; }
   function noteHTML(kind, item, label){
@@ -470,12 +555,13 @@ var ALIASES = {
 
   /* ---------- build ---------- */
   function buildHTML(b){
-    var label = (b.name || 'General') + ' ' + TASK_NAME[b.task];
+    var label = (b.name || 'General') + ' ' + TASK_NAME[b.task] + (b.weapon ? ' (' + b.weapon + ')' : '');
     return '<li class="card bitem '+(b.done ? 'done' : 'open')+'" data-id="'+b.id+'">'
       + (b.done ? '' : '<span class="grip" aria-hidden="true">⠇</span>')
       + '<input type="checkbox" data-kind="build" data-id="'+b.id+'" data-field="done"'+(b.done?' checked':'')+' aria-label="Mark '+esc(label)+' as done">'
       + '<span class="bname'+(b.name ? '' : ' general')+'">'+esc(b.name || 'General')+'</span>'
       + '<select class="mini" data-kind="build" data-id="'+b.id+'" data-field="task" aria-label="Task for '+esc(b.name || 'general task')+'">'+taskOptions(b.task)+'</select>'
+      + (b.task === 'weapon' ? '<select class="mini wsel" data-kind="build" data-id="'+b.id+'" data-field="weapon" aria-label="Weapon for '+esc(b.name || 'general task')+'">'+weaponOptions(b.name, b.weapon || '')+'</select>' : '')
       + noteHTML('build', b, label)
       + '<span class="spacer"></span>'
       + '<button class="x" data-act="del-build" data-id="'+b.id+'" aria-label="Delete '+esc(label)+'">×</button></li>';
@@ -485,7 +571,8 @@ var ALIASES = {
     var html = '<p class="hint">What your characters still need. Pick a character and a task. Check it off when it’s done, and drag to reorder. Use <b>Other</b> for things like farming that aren’t tied to one character.</p>';
     html += '<div class="addbar">'
       + '<label class="field grow">Character '+comboInput('id="nb-name" data-combo="build"','Search characters','Character')+'</label>'
-      + '<label class="field">Task <select id="nb-task">'+taskOptions('level')+'</select></label>'
+      + '<label class="field">Task <select id="nb-task">'+taskOptions(lastBuildTask)+'</select></label>'
+      + '<label class="field" id="nb-weapon-field"'+(lastBuildTask === 'weapon' ? '' : ' hidden')+'>Weapon <select id="nb-weapon">'+(lastBuildTask === 'weapon' ? weaponOptions('', '') : '')+'</select></label>'
       + '<label class="field grow">Note <input type="text" id="nb-note" data-enter="add-build" placeholder="Optional"></label>'
       + '<button class="btn primary" data-act="add-build">Add task</button></div>';
     var open = state.builds.filter(function(b){ return !b.done; });
@@ -714,7 +801,11 @@ var ALIASES = {
     var kind = input.dataset.combo;
     if(kind === 'slot') addToSlot(input.dataset.team, +input.dataset.slot, name);
     else if(kind === 'pull') addPull(name);
-    else if(kind === 'build'){ input.value = name; var t = document.getElementById('nb-task'); if(t) t.focus(); }
+    else if(kind === 'build'){
+      input.value = name; syncWeaponField();
+      var t = document.getElementById(document.getElementById('nb-task').value === 'weapon' ? 'nb-weapon' : 'nb-task');
+      if(t) t.focus();
+    }
   }
 
   document.addEventListener('focusin', function(e){
@@ -778,14 +869,16 @@ var ALIASES = {
     var el = document.getElementById('nb-name');
     var name = canonical(el.value);
     var task = document.getElementById('nb-task').value;
+    var weapon = task === 'weapon' ? document.getElementById('nb-weapon').value : '';
     var note = document.getElementById('nb-note').value.trim();
     if(!name && task !== 'other'){ toast('Pick a character, or choose Other for a general task.'); el.focus(); return; }
     if(!name && !note){ toast('Add a note so you know what this task is.'); document.getElementById('nb-note').focus(); return; }
-    if(name && state.builds.some(function(b){ return !b.done && lc(b.name) === lc(name) && b.task === task && !note; })){
+    if(name && state.builds.some(function(b){ return !b.done && lc(b.name) === lc(name) && b.task === task && (b.weapon || '') === weapon && !note; })){
       toast(name + ' already has a ' + TASK_NAME[task] + ' task.'); return;
     }
     remember(name);
-    state.builds.push({id:uid(), name:name, task:task, note:note, done:false});
+    state.builds.push({id:uid(), name:name, task:task, weapon:weapon, note:note, done:false});
+    lastBuildTask = task;
     focusSel = '#nb-name';
     commit();
   }
@@ -833,6 +926,8 @@ var ALIASES = {
 
   app.addEventListener('change', function(e){
     var el = e.target, kind = el.dataset && el.dataset.kind;
+    if(el.id === 'nb-task'){ lastBuildTask = el.value; syncWeaponField(); return; }
+    if(el.id === 'nb-name'){ syncWeaponField(); return; }
     if(!kind) return;
     var coll = kind === 'team' ? state.teams : kind === 'pull' ? state.pulls : state.builds;
     var item = find(coll, el.dataset.id);
@@ -842,7 +937,7 @@ var ALIASES = {
       item.done = el.checked;
       commit();
       if(item.done){
-        var label = (item.name || 'General') + ' ' + TASK_NAME[item.task].toLowerCase();
+        var label = (item.name || 'General') + ' ' + TASK_NAME[item.task].toLowerCase() + (item.weapon ? ' (' + item.weapon + ')' : '');
         toast('Finished: ' + label + '.', function(){ item = find(state.builds, item.id); if(item){ item.done = false; commit(); } });
       }
       return;
