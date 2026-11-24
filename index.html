@@ -377,7 +377,6 @@ var CHAR_WEAPON = {
     build:{label:'Need to build', short:'build'},
     done:{label:'Ready', short:'ready'}
   };
-  var RANK = {done:0, build:1, pull:2};
   var TASKS = [['level','Level'],['weapon','Weapon'],['skills','Skills'],['echoes','Echoes'],['other','Other']];
   var TASK_NAME = {}; TASKS.forEach(function(t){ TASK_NAME[t[0]] = t[1]; });
 
@@ -551,7 +550,7 @@ var CHAR_WEAPON = {
   /* ---------- teams ---------- */
   function slotInfo(slot){
     var opts = slot.map(function(n){ return {name:n, status:statusOf(n)}; });
-    var best = opts.slice().sort(function(a,b){ return RANK[a.status] - RANK[b.status]; })[0];
+    var best = opts[0]; // the main (top) pick decides the slot's status
     return {opts:opts, best:best, status: best ? best.status : 'empty'};
   }
 
